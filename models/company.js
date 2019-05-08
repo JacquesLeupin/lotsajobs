@@ -45,7 +45,8 @@ class Company {
     } 
 
     static async update(handle, columnsToUpdate){
-         let {query, values} = partialUpdate('companies', columnsToUpdate, 'handle', handle)
+        let {query, values} = partialUpdate('companies', columnsToUpdate, 'handle', handle)
+        console.log(columnsToUpdate, "columns 2 update", query, values)
 
          const result = await db.query(query, values)
          return result.rows[0]

@@ -4,13 +4,6 @@
     "$id": "http://example.com/root.json",
     "type": "object",
     "title": "The Root Schema",
-    "required": [
-      "handle",
-      "name",
-      "num_employees",
-      "description",
-      "logo_url"
-    ],
     "properties": {
       "handle": {
         "$id": "#/properties/handle",
@@ -18,7 +11,7 @@
         "title": "The Handle Schema",
         "default": "",
         "examples": [
-          "UCSF"
+          "GGLY"
         ],
         "pattern": "^(.*)$"
       },
@@ -28,7 +21,7 @@
         "title": "The Name Schema",
         "default": "",
         "examples": [
-          "University of Cal SF"
+          "Gooooo===ogly"
         ],
         "pattern": "^(.*)$"
       },
@@ -38,7 +31,7 @@
         "title": "The Num_employees Schema",
         "default": 0,
         "examples": [
-          3000
+          1234
         ]
       },
       "description": {
@@ -47,7 +40,7 @@
         "title": "The Description Schema",
         "default": "",
         "examples": [
-          "Where Orlando used to work but he got stressed"
+          "Where Jax will work"
         ],
         "pattern": "^(.*)$"
       },
@@ -57,8 +50,9 @@
         "title": "The Logo_url Schema",
         "default": "",
         "examples": [
-          "www.neopets.com"
-        ]
+          "www.lolgetoutofhere.com"
+        ],
+        "pattern": "^(.*)$"
       }
     }
   }
