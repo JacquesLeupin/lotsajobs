@@ -34,6 +34,11 @@ class Company {
       
     //   module.exports = sqlForPartialUpdate
 
+    static async findAll(){
+        const results = await db.query(`SELECT * FROM companies`)
+        return results.rows
+    }
+
     static async delete(handle){
         const result = await db.query(`DELETE FROM companies WHERE handle=$1 RETURNING *`, [handle])
         return result.rows[0] 
