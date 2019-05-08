@@ -4,6 +4,9 @@ const companyPatchSchema = require("./schemas/companyPatchSchema.json")
 const ExpressError = require("./helpers/expressError")
 
 
+/** Validator for company data. Ensures the keys:
+ * handle (string), name (string), num_employees (integer), description (string), logo_url (string)
+ */
 function validateCompanyData(req, res, next) {
   
   const result = jsonschema.validate(req.body, companySchema)
@@ -16,6 +19,9 @@ function validateCompanyData(req, res, next) {
   return next()
 }
 
+/** Validator for company data for patching. All are optional
+ * handle (string), name (string), num_employees (integer), description (string), logo_url (string)
+ */
 function validateCompanyPatchData(req, res, next) {
   
   const result = jsonschema.validate(req.body, companyPatchSchema)
