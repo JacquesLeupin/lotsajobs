@@ -8,7 +8,15 @@ const router = new express.Router()
 
 router.get("/", async function (req, res, next) {
     try {
-      // If there are no query parameters, then GET will return all the companies
+     
+        if(Object.getOwnPropertyNames(req.query).length === 0){
+            const jobs = await Job.findAll()
+            return res.json({ jobs })
+        }
+        else{
+            const jobs = await Job.findJobs(req.query)
+            return res.json({ jobs })
+        }
     } catch (err) {
       return next(err)
     }
@@ -18,7 +26,7 @@ router.get("/", async function (req, res, next) {
   router.post("/", async function (req, res, next) {
     try {
         const job = await Job.create(req.body)
-        return res.json(job)
+        return res.json({ job })
     } catch (err) {
       return next(err)
     }
@@ -26,40 +34,46 @@ router.get("/", async function (req, res, next) {
   
   
   // Read by handle. Get JSON of a specific company based on handle
-  router.get("/:handle", async function (req, res, next) {
+  router.get("/:id", async function (req, res, next) {
     try {
   
-      const { handle } = req.params
+      const { id } = req.params
+      const job = await Job.findById(id)
   
-      return res.json(company)
+      if(!job){
+          return next(new ExpressError("Job not found"), 404)
+      }
+      return res.json(job)
     } catch (err) {
       return next(err)
     }
   })
   
   
-  // Update a company based on handle, with any of the provided
-  router.patch("/:handle", async function (req, res, next) {
+  // Update a company based on id, with any of the provided
+  router.patch("/:id", async function (req, res, next) {
     try {
-      const { handle } = req.params
+      const { id } = req.params
   
       // Update the company
-      const company = await Company.update(handle, req.body)
-      return res.json({ company })
+      const job = await Job.update(id, req.body)
+      return res.json({ job })
     } catch (err) {
       return next(err)
     }
   })
   
   // Remove by handle
-  router.delete("/:handle", async function (req, res, next) {
+  router.delete("/:id", async function (req, res, next) {
     try {
-  
+    
+        const  { id } = req.params
+        const job = await Job.delete(id)
       // Delete if the company exists
-      if (company) {
-        return res.json({ message: "Company deleted" })
+      if (job) {
+        return res.json({ message: "Job deleted" })
       } else {
-        return res.json({ message: "Company does not exist"})
+        return res.json({ message: "Job does not exist"})
       }
     } catch (err) {
       return next(err)
