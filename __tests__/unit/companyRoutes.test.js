@@ -33,7 +33,7 @@ beforeEach(function () {
 
 afterEach(function () {
 
-    db.query(`TRUNCATE TABLE companies`)
+    db.query(`TRUNCATE TABLE companies CASCADE`)
 })
 
 
