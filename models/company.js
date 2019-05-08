@@ -62,18 +62,36 @@ class Company {
 
         const {search, min_employees, max_employees} = data
         let baseQuery = `SELECT handle, name FROM companies`
-        
+        let whereStatements = []
+        let queryValues = []
+        let counter = 1
 
-        // we may need to re-insert this if we try for multiple search terms
-        // let columns = []
+        if(search){
+            whereStatements.push(`name LIKE $${counter}`)
+            queryValues.push(search)
+            counter++
+        }
+        if(min_employees){
+            whereStatements.push(`num_employees> $${counter}`)
+            queryValues.push(min_employees)
+            counter++
+        }
+        if(max_employees){
+            whereStatements.push(`num_employees< $${counter}`)
+            queryValues.push(max_employees)
+            counter++
+        }
 
-        // columns.push(search)
-        // columns.join()
+        if(whereStatements.length > 0){
+            whereStatements = whereStatements.join(' AND ')
+            console.log(whereStatements)
+            baseQuery += ' WHERE ' + whereStatements
+            console.log( "^^^^^^^^^^^^^^", baseQuery)
 
-        baseQuery += ` WHERE name = $1` 
-        baseQuery += ` AND num_employees BETWEEN $2 AND $3`
-        const dbQuery = await db.query(baseQuery, [search, min_employees, max_employees])
-        return dbQuery.rows[0]
+        }
+
+        const dbQuery = await db.query(baseQuery, queryValues)
+        return dbQuery.rows
     }
 
     static async create(data){

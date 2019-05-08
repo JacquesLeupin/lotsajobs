@@ -14,6 +14,10 @@ router.get("/", async function (req, res, next) {
           return res.json({companies})
       }
       else{
+        let {min_employees, max_employees} = req.query
+        if(min_employees && max_employees && min_employees > max_employees){
+          return next(new ExpressError("Please give a valid range", 400))
+        }
         const company = await Company.findCompanies(req.query)
         return res.json({company})  
       }
