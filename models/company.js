@@ -1,71 +1,97 @@
 const db = require("../db")
 const partialUpdate = require("../helpers/partialUpdate")
 
+
+/** register new user -- returns
+   *    {username, password, first_name, last_name, phone}
+   */
+/** Static company class to handle the db queries in PSQL.  */
 class Company {
 
-    static async findAll(){
+    /** Returns all the rows of the company table as 
+     * an array of  {handle, name, num_employees, description, logo_url }
+     */
+    static async findAll() {
         const results = await db.query(`SELECT * FROM companies`)
         return results.rows
     }
 
-    static async delete(handle){
+    /** Deletes the row in the db based on the handle name. Returns the entire row deleted.
+     * as : {handle, name, num_employees, description, logo_url }
+     */
+    static async delete(handle) {
         const result = await db.query(`DELETE FROM companies WHERE handle=$1 RETURNING *`, [handle])
-        return result.rows[0] 
-    } 
-
-    static async update(handle, columnsToUpdate){
-        let {query, values} = partialUpdate('companies', columnsToUpdate, 'handle', handle)
-
-         const result = await db.query(query, values)
-         return result.rows[0]
-    }
-      
-    static async findByHandle(handle){
-        console.log(handle)
-        const result = await db.query(`SELECT * FROM companies WHERE handle=$1`, [handle])
-        // console.log(result)
         return result.rows[0]
     }
 
-    static async findCompanies(data){
+    /** Updates the row matching the handle with an object of key:value pairs
+     * @params columnsToUpdate - POJO of column : value pairs, for columns to update and values to update with.
+     * Returns the same object as {handle, name, num_employees, description, logo_url }
+    */
+    static async update(handle, columnsToUpdate) {
+        let { query, values } = partialUpdate('companies', columnsToUpdate, 'handle', handle)
 
-        const {search, min_employees, max_employees} = data
+        const result = await db.query(query, values)
+        return result.rows[0]
+    }
+
+    /** Returns the single row of the company object :
+     * {handle, name, num_employees, description, logo_url }
+     */
+    static async findByHandle(handle) {
+        const result = await db.query(`SELECT * FROM companies WHERE handle=$1`, [handle])
+        return result.rows[0]
+    }
+
+
+    static async findCompanies(data) {
+
+        const { search, min_employees, max_employees } = data
         let baseQuery = `SELECT handle, name FROM companies`
+        
+        // Holds all the conditionals in an array 
         let whereStatements = []
+        
+        // Holds all the queryValues to be passed in. ($1, $2, $3, $4... etc)
         let queryValues = []
+        
+        // Counter keeps track of the $1.. $2.
         let counter = 1
 
-        if(search){
+        if (search) {
             whereStatements.push(`name LIKE $${counter}`)
             queryValues.push(search)
             counter++
         }
-        if(min_employees){
+
+        if (min_employees) {
             whereStatements.push(`num_employees> $${counter}`)
             queryValues.push(min_employees)
             counter++
         }
-        if(max_employees){
+
+        if (max_employees) {
             whereStatements.push(`num_employees< $${counter}`)
             queryValues.push(max_employees)
             counter++
         }
 
-        if(whereStatements.length > 0){
+        // Build the base query based off the whereStatements
+        if (whereStatements.length > 0) {
             whereStatements = whereStatements.join(' AND ')
-            console.log(whereStatements)
             baseQuery += ' WHERE ' + whereStatements
-            console.log( "^^^^^^^^^^^^^^", baseQuery)
-
         }
 
-        const dbQuery = await db.query(baseQuery, queryValues)
-        return dbQuery.rows
+        const result = await db.query(baseQuery, queryValues)
+        return result.rows
     }
 
-    static async create(data){
+    /** Creates a row and inserts it into the db
+     * Returns {handle, name, num_employees, description, logo_url }
+     */
+    static async create(data) {
 
-        const {handle, name, num_employees, description, logo_url} = data
+        const { handle, name, num_employees, description, logo_url } = data
         const result = await db.query(
             `INSERT INTO companies (
                 handle,
