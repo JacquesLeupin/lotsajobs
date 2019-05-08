@@ -76,10 +76,10 @@ describe("POST /jobs", function () {
         company_handle: "UCSF"
       });
     expect(response.statusCode).toBe(200);
-    expect(response.body.title).toEqual("Singer")
-    expect(response.body.salary).toEqual(12345)
-    expect(response.body.equity).toEqual(0.66);
-    expect(response.body.company_handle).toEqual("UCSF")
+    expect(response.body.job.title).toEqual("Singer")
+    expect(response.body.job.salary).toEqual(12345)
+    expect(response.body.job.equity).toEqual(0.66);
+    expect(response.body.job.company_handle).toEqual("UCSF")
 
   })
 
