@@ -1,10 +1,6 @@
 const db = require("../db")
 const partialUpdate = require("../helpers/partialUpdate")
 
-
-/** register new user -- returns
-   *    {username, password, first_name, last_name, phone}
-   */
 /** Static company class to handle the db queries in PSQL.  */
 class Company {
 
