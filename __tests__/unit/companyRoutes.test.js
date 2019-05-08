@@ -31,7 +31,6 @@ beforeEach(function () {
 )
 
 
-
 afterEach(function () {
 
     db.query(`TRUNCATE TABLE companies`)
@@ -53,6 +52,24 @@ describe("GET /companies", function () {
         const response = await request(app).get(`/companies?search=getAround`);
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual({ "company": [{ "handle": "AROUND", "name": "getAround" }] })
+    })
+
+    test("Return 404 for invalid query params", async function () {
+        const response = await request(app).get(`/companies?search=getAround&min_employees=3000&max_employees=200`);
+        expect(response.statusCode).toBe(400);
+        expect(response.body).toEqual({ "message": "Please give a valid range", "status": 400 })
+    })
+
+    test("Return specific company based on valid query params", async function () {
+        const response = await request(app).get(`/companies?min_employees=300&max_employees=2001`);
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual({ "company": [{ "handle": "AROUND", "name": "getAround" }] })
+    })
+
+    test("Return nothing if no companies satisfy valid query params", async function () {
+        const response = await request(app).get(`/companies?min_employees=300&max_employees=2000`);
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toEqual({ "company": [] })
     })
 })
 
