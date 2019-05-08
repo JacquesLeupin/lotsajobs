@@ -10,9 +10,9 @@ router.get("/", async function (req, res, next) {
   const company = await Company.findCompanies(req.query)
   return res.json({company})  
   } catch (err) {
-    return next(err);
+    return next(err)
   }
-});
+})
 
 router.post("/", async function (req, res, next) {
   try {
@@ -20,9 +20,9 @@ router.post("/", async function (req, res, next) {
     const companies = await Company.create(data) 
     return res.json(companies) 
   } catch (err) {
-    return next(err);
+    return next(err)
   }
-});
+})
 
 router.get("/:handle", async function (req, res, next) {
   try {
@@ -34,9 +34,9 @@ router.get("/:handle", async function (req, res, next) {
     }
     return res.json(company) 
   } catch (err) {
-    return next(err);
+    return next(err)
   }
-});
+})
 
 router.patch("/:handle", async function (req, res, next) {
   try {
@@ -44,9 +44,9 @@ router.patch("/:handle", async function (req, res, next) {
     const company = await Company.update(handle, req.body)
     return res.json({company})  
   } catch (err) {
-    return next(err);
+    return next(err)
   }
-});
+})
 
 router.delete("/:handle", async function (req, res, next) {
   try {
@@ -54,7 +54,7 @@ router.delete("/:handle", async function (req, res, next) {
     const company = await Company.delete(handle)
     return res.json({company}) 
   } catch (err) {
-    return next(err);
+    return next(err)
   }
-});
+})
 module.exports = router

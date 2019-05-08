@@ -7,19 +7,19 @@ describe("sqlForPartialUpdate()", () => {
         let {query, values} = sqlForPartialUpdate('companies', {name: "Jorlando"}, 'handle', 1)
 
     // FIXME: write real tests!
-    expect(query).toEqual("UPDATE companies SET name=$1 WHERE handle=$2 RETURNING *");
+    expect(query).toEqual("UPDATE companies SET name=$1 WHERE handle=$2 RETURNING *")
     expect(values).toEqual(["Jorlando", 1])
-  });
+  })
   it("should generate a proper partial update query with more than one field",
       function () { 
 
         let {query, values} = sqlForPartialUpdate('companies', {name: "Jorlando", num_employees: 5000}, 'handle', 3)
 
     // FIXME: write real tests!
-    expect(query).toEqual("UPDATE companies SET name=$1, num_employees=$2 WHERE handle=$3 RETURNING *");
+    expect(query).toEqual("UPDATE companies SET name=$1, num_employees=$2 WHERE handle=$3 RETURNING *")
     expect(values).toEqual(["Jorlando", 5000, 3])
-  });
-});
+  })
+})
 /**
  * Generate a selective update query based on a request body:
  *
