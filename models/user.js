@@ -28,7 +28,7 @@ class User {
 
   static async authenticate (username, password){
     const result = await db.query(`SELECT * FROM USERS WHERE USERNAME = $1 AND PASSWORD = $2`, [username, password]);
-    return result.rows;
+    return result.rows[0];
   }
 
   static async findByUsername(username) {

@@ -52,10 +52,33 @@ function ensureCorrectUser(req, res, next) {
     return next(new ExpressError("Unauthorized", 401));
   }
 }
+
+function ensureAdmin(req, res, next) {
+  try {
+    const tokenStr = req.body._token;
+    console.log(1, tokenStr);
+    let token = jwt.verify(tokenStr, SECRET_KEY);
+    console.log(2, token);
+    res.locals.username = token.username;
+    console.log(3, token.username === req.params.username)
+    console.log(4, token.username)
+    console.log(5, token.isAdmin)
+    console.log(6, token.isAdmin === true)
+    if (token.isAdmin) {
+      return next();
+    }
+
+    // throw an error, so we catch it in our catch, below
+    throw new Error();
+  } catch (err) {
+    return next(new ExpressError("Unauthorized", 401));
+  }
+}
 // end
 
 module.exports = {
   authenticateUser,
   ensureLoggedIn,
-  ensureCorrectUser
+  ensureCorrectUser,
+  ensureAdmin
 };

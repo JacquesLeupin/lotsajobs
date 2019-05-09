@@ -3,12 +3,14 @@ const Company = require("../models/company");
 const jsonschema = require("jsonschema");
 const ExpressError = require("../helpers/expressError");
 const { validateCompanyData, validateCompanyPatchData } = require('../middleware/inputDataValidation');
+const { ensureLoggedIn } = require("../middleware/auth");
+const { ensureAdmin } = require("../middleware/auth");
 
 const router = new express.Router();
 
 
 // Read companies
-router.get("/", async function (req, res, next) {
+router.get("/", ensureLoggedIn, async function (req, res, next) {
   try {
     // If there are no query parameters, then GET will return all the companies
     if (Object.getOwnPropertyNames(req.query).length === 0) {
@@ -32,7 +34,7 @@ router.get("/", async function (req, res, next) {
 });
 
 // Creation of a company
-router.post("/", validateCompanyData, async function (req, res, next) {
+router.post("/", validateCompanyData, ensureAdmin, async function (req, res, next) {
   try {
     const companies = await Company.create(req.body);
     return res.json(companies);
@@ -43,7 +45,7 @@ router.post("/", validateCompanyData, async function (req, res, next) {
 
 
 // Read by handle. Get JSON of a specific company based on handle
-router.get("/:handle", async function (req, res, next) {
+router.get("/:handle", ensureLoggedIn, async function (req, res, next) {
   try {
 
     const { handle } = req.params;
@@ -66,7 +68,7 @@ router.get("/:handle", async function (req, res, next) {
 
 
 // Update a company based on handle, with any of the provided
-router.patch("/:handle", validateCompanyPatchData, async function (req, res, next) {
+router.patch("/:handle", validateCompanyPatchData, ensureAdmin, async function (req, res, next) {
   try {
     const { handle } = req.params;
 
@@ -84,7 +86,7 @@ router.patch("/:handle", validateCompanyPatchData, async function (req, res, nex
 });
 
 // Remove by handle
-router.delete("/:handle", async function (req, res, next) {
+router.delete("/:handle", ensureAdmin, async function (req, res, next) {
   try {
     const { handle } = req.params;
     const company = await Company.delete(handle);

@@ -5,6 +5,7 @@ const ExpressError = require("../helpers/expressError");
 const jwt = require("jsonwebtoken");
 const { validateUserData, validateUserPatchData } = require('../middleware/inputDataValidation');
 const { SECRET_KEY } = require('../config');
+const { ensureCorrectUser } = require("../middleware/auth")
 
 const router = new express.Router();
 
@@ -22,7 +23,7 @@ router.get("/", async function (req, res, next) {
 router.post("/", validateUserData, async function (req, res, next) {
   try {
     const user = await User.create(req.body);
-    const token = jwt.sign({user: user.username}, SECRET_KEY);
+    const token = jwt.sign({user: user.username, isAdmin: user.is_admin}, SECRET_KEY);
 
     return res.json({ user: { username: user.username, firstname: user.first_name, lastname: user.last_name, email: user.email }, token: token});
   } catch (err) {
@@ -50,7 +51,7 @@ router.get("/:username", async function (req, res, next) {
 
 
 // Update a user based on username, with any data provided
-router.patch("/:username", validateUserPatchData, async function (req, res, next) {
+router.patch("/:username", ensureCorrectUser, validateUserPatchData, async function (req, res, next) {
   try {
     const { username } = req.params;
     // If the user username does not exist in the database, return a user not found.
@@ -67,7 +68,7 @@ router.patch("/:username", validateUserPatchData, async function (req, res, next
 });
 
 // Remove by username
-router.delete("/:username", async function (req, res, next) {
+router.delete("/:username", ensureCorrectUser, async function (req, res, next) {
   try {
     const { username } = req.params;
     const user = await User.delete(username);
