@@ -1,0 +1,57 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://example.com/root.json",
+    "type": "object",
+    "title": "The Root Schema",
+    "properties": {
+      "title": {
+        "$id": "#/properties/title",
+        "type": "string",
+        "title": "The Title Schema",
+        "default": "",
+        "examples": [
+          "theboss"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "salary": {
+        "$id": "#/properties/salary",
+        "type": "integer",
+        "title": "The Salary Schema",
+        "default": 0,
+        "examples": [
+          1000000
+        ]
+      },
+      "equity": {
+        "$id": "#/properties/equity",
+        "type": "number",
+        "title": "The Equity Schema",
+        "default": 0.0,
+        "examples": [
+          0.9
+        ]
+      },
+      "company_handle": {
+        "$id": "#/properties/company_handle",
+        "type": "string",
+        "title": "The Company_handle Schema",
+        "default": "",
+        "examples": [
+          "BOOGLY"
+        ],
+        "pattern": "^(.*)$"
+      },
+      "date_posted": {
+        "$id": "#/properties/date_posted",
+        "type": "string",
+        "title": "The Date_posted Schema",
+        "default": "",
+        "examples": [
+          "2019-05-08T23:03:59.904Z"
+        ],
+        "pattern": "^(.*)$"
+      }
+    }
+  }

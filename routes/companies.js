@@ -23,6 +23,7 @@ router.get("/", async function (req, res, next) {
 
       // Nothing wrong with query paramters, find the specific companie(s) matching those queries
       const company = await Company.findCompanies(req.query)
+      console.log(company)
       return res.json({ company })
     }
   } catch (err) {
@@ -47,12 +48,17 @@ router.get("/:handle", async function (req, res, next) {
 
     const { handle } = req.params
 
+    // Send out two db queries at same time for company and jobs
+    const companyPromise = Company.findByHandle(handle)
+    const jobsPromise = Company.findAllJobsFromCompanyHandle(handle);
+    
+    let [company, jobs] = await Promise.all([companyPromise, jobsPromise])
+    
     // If company cannot be found, then send a not found error
-    const company = await Company.findByHandle(handle)
     if (!company) {
       return next(new ExpressError("Company not found!", 404))
     }
-    return res.json(company)
+    return res.json({company, jobs})
   } catch (err) {
     return next(err)
   }

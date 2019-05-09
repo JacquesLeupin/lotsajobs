@@ -1,6 +1,8 @@
 const jsonschema = require("jsonschema")
 const companySchema = require("./schemas/companySchema.json")
 const companyPatchSchema = require("./schemas/companyPatchSchema.json")
+const jobSchema = require("./schemas/jobSchema.json")
+const jobPatchSchema = require("./schemas/jobPatchSchema.json")
 const ExpressError = require("./helpers/expressError")
 
 
@@ -34,4 +36,27 @@ function validateCompanyPatchData(req, res, next) {
   return next()
 }
 
-module.exports = { validateCompanyData, validateCompanyPatchData }
+function validateJobData(req, res, next) {
+  
+  const result = jsonschema.validate(req.body, jobSchema)
+  
+  if (!result.valid) {
+    let listOfErrors = result.errors.map(err => err.stack)
+    let error = new ExpressError(listOfErrors, 400)
+    return next(error)
+  } 
+  return next()
+}
+
+function validateJobPatchData(req, res, next) {
+  
+  const result = jsonschema.validate(req.body, jobPatchSchema)
+  
+  if (!result.valid) {
+    let listOfErrors = result.errors.map(err => err.stack)
+    let error = new ExpressError(listOfErrors, 400)
+    return next(error)
+  } 
+  return next()
+}
+module.exports = { validateCompanyData, validateCompanyPatchData, validateJobData,validateJobPatchData }

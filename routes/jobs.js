@@ -2,7 +2,7 @@ const express = require("express")
 const Job = require("../models/job")
 const jsonschema = require("jsonschema")
 const ExpressError = require("../helpers/expressError")
-const { CHANGEME } = require('../middleware')
+const { validateJobData, validateJobPatchData } = require('../middleware')
 
 const router = new express.Router()
 
@@ -23,7 +23,7 @@ router.get("/", async function (req, res, next) {
   })
   
   // Creation of a company
-  router.post("/", async function (req, res, next) {
+  router.post("/", validateJobData, async function (req, res, next) {
     try {
         const job = await Job.create(req.body)
         return res.json({ job })
@@ -51,7 +51,7 @@ router.get("/", async function (req, res, next) {
   
   
   // Update a company based on id, with any of the provided
-  router.patch("/:id", async function (req, res, next) {
+  router.patch("/:id", validateJobPatchData, async function (req, res, next) {
     try {
       const { id } = req.params
   
