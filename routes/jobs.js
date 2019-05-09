@@ -3,11 +3,14 @@ const Job = require("../models/job");
 const jsonschema = require("jsonschema");
 const ExpressError = require("../helpers/expressError");
 const { validateJobData, validateJobPatchData } = require('../middleware/inputDataValidation');
+const { ensureLoggedIn } = require("../middleware/auth");
+const { ensureAdmin } = require("../middleware/auth");
 
+ 
 const router = new express.Router();
 
 // READ /jobs -- return all the jobs based on the query params
-router.get("/", async function (req, res, next) {
+router.get("/", ensureLoggedIn, async function (req, res, next) {
   try {
 
     // No query params specified - show all jobs
@@ -26,7 +29,7 @@ router.get("/", async function (req, res, next) {
 
 /**  Read by id. Get JSON of a specific job based on id
  */
-router.get("/:id", async function (req, res, next) {
+router.get("/:id", ensureLoggedIn, async function (req, res, next) {
   try {
 
     const { id } = req.params;
@@ -43,7 +46,7 @@ router.get("/:id", async function (req, res, next) {
 
 
 // CREATE a job, returns a job object created
-router.post("/", validateJobData, async function (req, res, next) {
+router.post("/", ensureAdmin, validateJobData, async function (req, res, next) {
   try {
     const job = await Job.create(req.body);
     return res.json({ job });
@@ -54,7 +57,7 @@ router.post("/", validateJobData, async function (req, res, next) {
 
 
 // UPDATE a job based on id, with any of the data provided
-router.patch("/:id", validateJobPatchData, async function (req, res, next) {
+router.patch("/:id", ensureAdmin, validateJobPatchData, async function (req, res, next) {
   try {
     const { id } = req.params;
     // if job doesn't exist, we can't update
@@ -70,7 +73,7 @@ router.patch("/:id", validateJobPatchData, async function (req, res, next) {
 });
 
 // Remove a job by ID
-router.delete("/:id", async function (req, res, next) {
+router.delete("/:id", ensureAdmin, async function (req, res, next) {
   try {
 
     const { id } = req.params;
