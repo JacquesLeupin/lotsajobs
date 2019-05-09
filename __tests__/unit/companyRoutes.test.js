@@ -13,8 +13,8 @@ let companyOne = {
     "logo_url": "lolgetoutofhere"
 }
 
-beforeEach(function () {
-    db.query(`INSERT INTO companies (
+beforeEach(async function () {
+    await db.query(`INSERT INTO companies (
                 handle,
                 name,
                 num_employees,
@@ -31,9 +31,13 @@ beforeEach(function () {
 )
 
 
-afterEach(function () {
+afterEach(async function () {
 
-    db.query(`TRUNCATE TABLE companies CASCADE`)
+    await db.query(`TRUNCATE TABLE companies CASCADE`)
+})
+
+afterAll(async function() {
+    await db.end();
 })
 
 
