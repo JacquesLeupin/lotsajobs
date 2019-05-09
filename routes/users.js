@@ -2,7 +2,9 @@ const express = require("express");
 const User = require("../models/user");
 const jsonschema = require("jsonschema");
 const ExpressError = require("../helpers/expressError");
+const jwt = require("jsonwebtoken");
 const { validateUserData, validateUserPatchData } = require('../middleware/inputDataValidation');
+const { SECRET_KEY } = require('../config');
 
 const router = new express.Router();
 
@@ -20,7 +22,9 @@ router.get("/", async function (req, res, next) {
 router.post("/", validateUserData, async function (req, res, next) {
   try {
     const user = await User.create(req.body);
-    return res.json({ user: { username: user.username, firstname: user.first_name, lastname: user.last_name, email: user.email } });
+    const token = jwt.sign({user: user.username}, SECRET_KEY);
+
+    return res.json({ user: { username: user.username, firstname: user.first_name, lastname: user.last_name, email: user.email }, token: token});
   } catch (err) {
     return next(err);
   }
