@@ -35,9 +35,23 @@ class Company {
      * {handle, name, num_employees, description, logo_url }
      */
     static async findByHandle(handle) {
-        const result = await db.query(`SELECT * FROM companies WHERE handle=$1`, [handle])
+        const result = await db.query(  
+            `SELECT * FROM companies 
+                WHERE handle=$1`, [handle])
         return result.rows[0]
     }
+
+    /** Returns a list of all the jobs that belong to a company */
+    static async findAllJobsFromCompanyHandle(handle) {
+        const result = await db.query(  
+            `SELECT jobs.title, jobs.salary, jobs.equity FROM jobs
+                JOIN companies ON companies.handle = jobs.company_handle 
+                WHERE companies.handle=$1` 
+                , [handle])
+        return result.rows;
+    }
+
+
 
 
     static async findCompanies(data) {
@@ -77,7 +91,7 @@ class Company {
             whereStatements = whereStatements.join(' AND ')
             baseQuery += ' WHERE ' + whereStatements
         }
-
+        console.log(baseQuery, "HEREEEEE", queryValues)
         const result = await db.query(baseQuery, queryValues)
         return result.rows
     }

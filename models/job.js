@@ -3,15 +3,19 @@ const partialUpdate = require("../helpers/partialUpdate")
 
 class Job {
     
+    // finds all jobs, ordered by date
     static async findAll (){
         const results = await db.query(`SELECT * FROM jobs ORDER BY date_posted DESC`)
         return results.rows
     }
+
+    // finds a specific job, based on that job's ID
     static async findById(id) {
         const result = await db.query(`SELECT * FROM jobs WHERE id=$1`, [id])
         return result.rows[0]
     }
 
+    // finds jobs based off of optional query parameters
     static async findJobs(data){
         const { title, min_salary, min_equity } = data
         let baseQuery = `SELECT title, company_handle FROM jobs`
@@ -47,6 +51,7 @@ class Job {
         return result.rows
     }
 
+    //updates specific jobs in the jobs table
     static async update(id, columnsToUpdate) {
         let { query, values } = partialUpdate('jobs', columnsToUpdate, 'id', id)
 
@@ -54,6 +59,7 @@ class Job {
         return result.rows[0]
     }
 
+    //create a job in the jobs database
     static async create(data) {
 
         const { title, salary, equity, company_handle } = data
@@ -71,6 +77,7 @@ class Job {
         return result.rows[0]
     }
 
+    //delete a job, based on the job's ID
     static async delete(id) {
         const result = await db.query(`DELETE FROM jobs WHERE id=$1 RETURNING *`, [id])
         return result.rows[0]

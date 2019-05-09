@@ -2,7 +2,7 @@ const express = require("express")
 const Job = require("../models/job")
 const jsonschema = require("jsonschema")
 const ExpressError = require("../helpers/expressError")
-const { CHANGEME } = require('../middleware')
+const { validateJobData, validateJobPatchData } = require('../middleware')
 
 const router = new express.Router()
 
@@ -22,8 +22,8 @@ router.get("/", async function (req, res, next) {
     }
   })
   
-  // Creation of a company
-  router.post("/", async function (req, res, next) {
+  // Creation of a job
+  router.post("/", validateJobData, async function (req, res, next) {
     try {
         const job = await Job.create(req.body)
         return res.json({ job })
@@ -33,7 +33,7 @@ router.get("/", async function (req, res, next) {
   })
   
   
-  // Read by handle. Get JSON of a specific company based on handle
+  // Read by handle. Get JSON of a specific job based on id
   router.get("/:id", async function (req, res, next) {
     try {
   
@@ -50,12 +50,12 @@ router.get("/", async function (req, res, next) {
   })
   
   
-  // Update a company based on id, with any of the provided
-  router.patch("/:id", async function (req, res, next) {
+  // Update a job based on id, with any of the data provided
+  router.patch("/:id", validateJobPatchData, async function (req, res, next) {
     try {
       const { id } = req.params
   
-      // Update the company
+      // Update the job
       const job = await Job.update(id, req.body)
       return res.json({ job })
     } catch (err) {
@@ -63,13 +63,13 @@ router.get("/", async function (req, res, next) {
     }
   })
   
-  // Remove by handle
+  // Remove a job by ID
   router.delete("/:id", async function (req, res, next) {
     try {
     
         const  { id } = req.params
         const job = await Job.delete(id)
-      // Delete if the company exists
+      // Delete if the job exists
       if (job) {
         return res.json({ message: "Job deleted" })
       } else {
