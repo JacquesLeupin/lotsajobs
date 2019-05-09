@@ -7,6 +7,7 @@ const jwt = require("jsonwebtoken");
 const { validateUserData, validateUserPatchData } = require('../middleware/inputDataValidation');
 const { SECRET_KEY } = require('../config');
 const { ensureCorrectUser } = require("../middleware/auth");
+const { authenticateUser } = require("../middleware/auth");
 
 const router = new express.Router();
 
@@ -68,7 +69,7 @@ router.get("/:username", async function (req, res, next) {
 
 
 // Update a user based on username, with any data provided
-router.patch("/:username", ensureCorrectUser, validateUserPatchData, async function (req, res, next) {
+router.patch("/:username", authenticateUser, ensureCorrectUser, validateUserPatchData, async function (req, res, next) {
   try {
     const { username } = req.params;
     const userExists = await User.findByUsername(username);
@@ -90,7 +91,7 @@ router.patch("/:username", ensureCorrectUser, validateUserPatchData, async funct
 });
 
 // Remove by username
-router.delete("/:username", ensureCorrectUser, async function (req, res, next) {
+router.delete("/:username", authenticateUser, ensureCorrectUser, async function (req, res, next) {
   try {
     const { username } = req.params;
     const user = await User.delete(username);

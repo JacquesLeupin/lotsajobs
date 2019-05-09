@@ -5,9 +5,11 @@ const ExpressError = require("../helpers/expressError");
 const { validateJobData, validateJobPatchData } = require('../middleware/inputDataValidation');
 const { ensureLoggedIn } = require("../middleware/auth");
 const { ensureAdmin } = require("../middleware/auth");
+const { authenticateUser } = require("../middleware/auth");
 
- 
+
 const router = new express.Router();
+router.use(authenticateUser);
 
 // READ /jobs -- return all the jobs based on the query params
 router.get("/", ensureLoggedIn, async function (req, res, next) {

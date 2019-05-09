@@ -5,16 +5,17 @@ const ExpressError = require("../helpers/expressError");
 const { validateCompanyData, validateCompanyPatchData } = require('../middleware/inputDataValidation');
 const { ensureLoggedIn } = require("../middleware/auth");
 const { ensureAdmin } = require("../middleware/auth");
+const { authenticateUser } = require("../middleware/auth");
 
 const router = new express.Router();
 
-
+router.use(authenticateUser);
 // Read companies
 router.get("/", ensureLoggedIn, async function (req, res, next) {
   try {
     // If there are no query parameters, then GET will return all the companies
     const queryParams = Object.getOwnPropertyNames(req.query).length;
-    
+
     if (!queryParams) {
       const companies = await Company.findAll();
       return res.json({ companies });
@@ -51,7 +52,6 @@ router.get("/:handle", ensureLoggedIn, async function (req, res, next) {
   try {
 
     const { handle } = req.params;
-
     // Send out two db queries at same time for company and jobs
     const companyPromise = Company.findByHandle(handle);
     const jobsPromise = Company.findAllJobsFromCompanyHandle(handle);
