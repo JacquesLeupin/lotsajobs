@@ -19,12 +19,32 @@ const UCSF = {
 };
 
 const AROUNDCOMPANY = {
-  "handle": "AROUND",
-  "name": "getAround",
-  "num_employees": 2000,
-  "description": "Where Jax used to work",
-  "logo_url": "lolgetoutofhere"
+  handle: "AROUND",
+  name: "getAround",
+  num_employees: 2000,
+  description: "Where Jax used to work",
+  logo_url: "lolgetoutofhere"
 };
+
+const NOOBUSER = {
+  username: "noobuser",
+  password: "noob",
+  first_name: "Noobie",
+  last_name: "Saurus",
+  email: "Noobasaurus@noobland.com",
+  photo_url: "noob.com",
+  is_admin: false
+};
+
+const ADMIN = {
+  username: "admin",
+  password: "password",
+  first_name: "Appleseed",
+  last_name: "Dingushead",
+  email: "admin@admin.com",
+  photo_url: "pro.com",
+  is_admin: true
+}
 
 
 async function createAllTables() {
@@ -45,8 +65,23 @@ async function createAllTables() {
   equity FLOAT CHECK (equity > 0 AND equity <1) NOT NULL, 
   company_handle TEXT REFERENCES companies ON DELETE CASCADE,
   date_posted TIMESTAMP WITHOUT TIME ZONE NOT NULL
+  );
+  
+  CREATE TABLE users (
+    username TEXT PRIMARY KEY,
+    password TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL, 
+    email TEXT NOT NULL UNIQUE,
+    photo_url TEXT,
+    is_admin BOOLEAN DEFAULT false NOT NULL
   );`);
 }
+
+async function dropAllTables() {
+  await db.query(`DROP TABLE IF EXISTS companies, jobs, users`);
+}
+
 
 async function insertIntoCompanies(company) {
   await db.query(`INSERT INTO companies (
@@ -82,10 +117,13 @@ async function insertIntoJobs(job) {
 
 module.exports = {
   createAllTables,
+  dropAllTables,
   insertIntoCompanies,
   insertIntoJobs,
   CURRENT_TIME_STAMP,
   JRSPECIALIST,
   UCSF,
-  AROUNDCOMPANY
+  AROUNDCOMPANY,
+  NOOBUSER,
+  ADMIN
 };
