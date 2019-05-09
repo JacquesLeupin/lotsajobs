@@ -46,7 +46,7 @@ class Job {
       }
     }
 
-    if (whereStatements.length > 0) {
+    if (whereStatements.length) {
       baseQuery += ' WHERE ' + whereStatements.join(' AND ');
     }
     const result = await db.query(baseQuery, queryValues);

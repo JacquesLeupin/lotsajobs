@@ -12,9 +12,9 @@ const router = new express.Router();
 // READ /jobs -- return all the jobs based on the query params
 router.get("/", ensureLoggedIn, async function (req, res, next) {
   try {
-
+    const queryParams = Object.getOwnPropertyNames(req.query).length;
     // No query params specified - show all jobs
-    if (Object.getOwnPropertyNames(req.query).length === 0) {
+    if (!queryParams) {
       const jobs = await Job.findAll();
       return res.json({ jobs });
     }
@@ -35,10 +35,9 @@ router.get("/:id", ensureLoggedIn, async function (req, res, next) {
     const { id } = req.params;
     const job = await Job.findById(id);
 
-    if (!job) {
-      return next(new ExpressError("Job not found"), 404);
-    }
-    return res.json(job);
+    //if job doesn't exist, return new Error, else return json of job data
+    !job ? next(new ExpressError("Job not found"), 404) : res.json(job);
+
   } catch (err) {
     return next(err);
   }
@@ -60,8 +59,10 @@ router.post("/", ensureAdmin, validateJobData, async function (req, res, next) {
 router.patch("/:id", ensureAdmin, validateJobPatchData, async function (req, res, next) {
   try {
     const { id } = req.params;
+    const jobExists = await Job.findById(id);
+    
     // if job doesn't exist, we can't update
-    if (!(await Job.findById(id))) {
+    if (!jobExists) {
       return next(new ExpressError("Job not found", 404));
     }
     // Update the job
@@ -79,11 +80,8 @@ router.delete("/:id", ensureAdmin, async function (req, res, next) {
     const { id } = req.params;
     const job = await Job.delete(id);
     // Delete if the job exists
-    if (job) {
-      return res.json({ message: "Job deleted" });
-    } else {
-      return res.json({ message: "Job does not exist" });
-    }
+    job ? res.json({ message: "Job deleted" }) : res.json({ message: "Job does not exist" });
+    
   } catch (err) {
     return next(err);
   }

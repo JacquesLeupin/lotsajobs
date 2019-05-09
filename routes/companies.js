@@ -13,12 +13,14 @@ const router = new express.Router();
 router.get("/", ensureLoggedIn, async function (req, res, next) {
   try {
     // If there are no query parameters, then GET will return all the companies
-    if (Object.getOwnPropertyNames(req.query).length === 0) {
+    const queryParams = Object.getOwnPropertyNames(req.query).length;
+    
+    if (!queryParams) {
       const companies = await Company.findAll();
       return res.json({ companies });
-    }
-    else { // If there are query parameters, check if they are valid
-      let { min_employees, max_employees } = req.query;
+    } else { // If there are query parameters, check if they are valid
+      // refactor for camelCase with query params
+      const { min_employees, max_employees } = req.query;
       if (min_employees && max_employees && +min_employees > +max_employees) {
         return next(new ExpressError("Please give a valid range", 400));
       }
@@ -71,9 +73,9 @@ router.get("/:handle", ensureLoggedIn, async function (req, res, next) {
 router.patch("/:handle", validateCompanyPatchData, ensureAdmin, async function (req, res, next) {
   try {
     const { handle } = req.params;
-
+    const handleExists = (await Company.findByHandle(handle));
     // If the company handle does not exist in the database, return a company not found.
-    if (!(await Company.findByHandle(handle))) {
+    if (!(handleExists)) {
       return next(new ExpressError("Company not found!", 404));
     }
 
@@ -92,12 +94,10 @@ router.delete("/:handle", ensureAdmin, async function (req, res, next) {
     const company = await Company.delete(handle);
 
     // Delete if the company exists
-    if (company) {
-      return res.json({ message: "Company deleted" });
-    } else {
-      return res.json({ message: "Company does not exist"});
-    }
-  } catch (err) {
+    company ? res.json({ message: "Company deleted" }) : res.json({ message: "Company does not exist"});
+  
+  }
+  catch (err) {
     return next(err);
   }
 });

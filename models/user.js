@@ -59,7 +59,7 @@ class User {
   /* Small helper function to chekc if a user exists in a table */
   static async alreadyExists(username, email){
     const result = await db.query(`SELECT * FROM users WHERE username=$1 AND email=$2`, [username, email]);
-    return result.rows[0] || null;
+    return result.rows[0];
   }
 
   /** Updates the row matching the passed username with an object of key:value pairs

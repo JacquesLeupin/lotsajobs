@@ -59,8 +59,6 @@ function ensureAdmin(req, res, next) {
       return next();
     }
 
-    // throw an error, so we catch it in our catch, below
-    throw new Error();
   } catch (err) {
     return next(new ExpressError("Unauthorized", 401));
   }

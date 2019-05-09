@@ -1,3 +1,4 @@
+/* eslint-disable indent */
 const express = require("express");
 const User = require("../models/user");
 const jsonschema = require("jsonschema");
@@ -6,7 +7,6 @@ const jwt = require("jsonwebtoken");
 const { validateUserData, validateUserPatchData } = require('../middleware/inputDataValidation');
 const { SECRET_KEY } = require('../config');
 const { ensureCorrectUser } = require("../middleware/auth");
-const bcrypt = require('bcrypt');
 
 const router = new express.Router();
 
@@ -26,17 +26,20 @@ router.post("/", validateUserData, async function (req, res, next) {
     
     const email = req.body.email;
     const username = req.body.username;
-
-    // Check to see if username/email already exists in database.  If so, throw an error.
     const alreadyTaken = await User.alreadyExists(username, email);
+
     if (alreadyTaken){
       return next(new ExpressError("${username} already taken...", 400));
     }
+
     const user = await User.create(req.body);
-    
     const token = jwt.sign({user: user.username, isAdmin: user.is_admin}, SECRET_KEY);
 
-    return res.json({ user: { username: user.username, firstname: user.first_name, lastname: user.last_name, email: user.email }, token: token});
+    return res.json({ user: { username: user.username, 
+                            firstname: user.first_name, 
+                            lastname: user.last_name, 
+                            email: user.email }, 
+                            token: token});
   } catch (err) {
     return next(err);
   }
@@ -48,13 +51,16 @@ router.get("/:username", async function (req, res, next) {
   try {
 
     const { username } = req.params;
-
     const user = await User.findByUsername(username);
 
     if (!user) {
       return next(new ExpressError("User not found!", 404));
     }
-    return res.json({ user: { username: user.username, firstname: user.first_name, lastname: user.last_name, email: user.email, photo_url: user.photo_url } });
+    return res.json({ user: { username: user.username, 
+                              firstname: user.first_name, 
+                              lastname: user.last_name, 
+                              email: user.email, 
+                              photo_url: user.photo_url } });
   } catch (err) {
     return next(err);
   }
@@ -65,14 +71,19 @@ router.get("/:username", async function (req, res, next) {
 router.patch("/:username", ensureCorrectUser, validateUserPatchData, async function (req, res, next) {
   try {
     const { username } = req.params;
+    const userExists = await User.findByUsername(username);
     // If the user username does not exist in the database, return a user not found.
-    if (!(await User.findByUsername(username))) {
+    if (!userExists) {
       return next(new ExpressError("User not found!", 404));
     }
 
     // Update the User
     const user = await User.update(username, req.body);
-    return res.json({ user: { username: user.username, firstname: user.first_name, lastname: user.last_name, email: user.email, photo_url: user.photo_url } });
+    return res.json({ user: { username: user.username, 
+                              firstname: user.first_name, 
+                              lastname: user.last_name, 
+                              email: user.email, 
+                              photo_url: user.photo_url } });
   } catch (err) {
     return next(err);
   }
