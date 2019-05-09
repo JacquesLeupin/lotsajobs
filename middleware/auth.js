@@ -1,42 +1,61 @@
+/** Middleware for handling req authorization for routes. */
 
-const express = require('express');
-const User = require('../models/user');
 const jwt = require("jsonwebtoken");
-const { SECRET_KEY } = require('../config')
-
-const router = express.Router();
-const db = require('../db');
-const bcrypt = require('bcrypt');
-const { authenticateJWT } = require("../middleware/auth");
+const { SECRET_KEY } = require("../config");
+const ExpressError = require("../helpers/expressError");
+// Middleware to track our paths
 
 
+/** Middleware: Authenticate user. */
 
-/** POST /login - login: {username, password} => {token}
- *
- * Make sure to update their last-login!
- *
- **/
-
-router.post('/login', async function(req, res, next){
+function authenticateUser(req, res, next) {
   try {
-    const { username, password } = req.body;
-    const isAuth = await User.authenticate(username, password);
-    if (isAuth) {
-      let token = jwt.sign({ username }, SECRET_KEY);
-      return res.json({ token })
-    }
-    throw new ExpressError("Invalid user/password",400);
-  } catch (error) {
-    return next(error);
+    const tokenFromBody = req.body._token;
+    const payload = jwt.verify(tokenFromBody, SECRET_KEY);
+    req.user = payload;
+    return next();
+  } catch (err) {
+    return next();
   }
-})
+}
+// end
+
+/** Middleware: Requires user is authenticated. */
+
+function ensureLoggedIn(req, res, next) {
+  if (!req.user) {
+    return next({ status: 401, message: "Unauthorized" });
+  } else {
+    return next();
+  }
+}
+
+// end
+
+/** Middleware: Requires correct username. */
 
 
-/** POST /register - register user: registers, logs in, and returns token.
- *
- * {username, password, first_name, last_name, phone} => {token}.
- *
- *  Make sure to update their last-login!
- */
+function ensureCorrectUser(req, res, next) {
+  try {
+    const tokenStr = req.body._token;
 
-module.exports = router;
+    let token = jwt.verify(tokenStr, SECRET_KEY);
+    res.locals.username = token.username;
+
+    if (token.username === req.params.username) {
+      return next();
+    }
+
+    // throw an error, so we catch it in our catch, below
+    throw new Error();
+  } catch (err) {
+    return next(new ExpressError("Unauthorized", 401));
+  }
+}
+// end
+
+module.exports = {
+  authenticateUser,
+  ensureLoggedIn,
+  ensureCorrectUser
+};

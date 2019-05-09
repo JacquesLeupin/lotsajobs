@@ -8,15 +8,15 @@
 
 class ExpressError extends Error {
   constructor(message, status) {
-    super()
-    this.message = message
-    this.status = status
+    super();
+    this.message = message;
+    this.status = status;
     if (process.env.NODE_ENV !== "test") {
-      console.error(this.stack)
+      console.error(this.stack);
     } else {
       // Don't print 
     }
   }
 }
 
-module.exports = ExpressError
+module.exports = ExpressError;
