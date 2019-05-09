@@ -16,3 +16,13 @@ CREATE TABLE jobs (
   company_handle TEXT REFERENCES companies ON DELETE CASCADE,
   date_posted TIMESTAMP WITHOUT TIME ZONE NOT NULL
 );
+
+CREATE TABLE users (
+  username TEXT PRIMARY KEY,
+  password TEXT NOT NULL,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL, 
+  email TEXT NOT NULL UNIQUE,
+  photo_url TEXT,
+  is_admin BOOLEAN DEFAULT false NOT NULL
+);
