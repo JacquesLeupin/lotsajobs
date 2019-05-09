@@ -4,7 +4,7 @@ const request = require("supertest");
 const app = require("../../app");
 
 let db = require("../../db");
-const { createAllTables, insertIntoCompanies } = require("../../helpers/testHelpers");
+const { createAllTables, insertIntoCompanies, dropAllTables } = require("../../helpers/testHelpers");
 
 
 // Grab a sample testing company, the AROUND COMPANY
@@ -12,14 +12,14 @@ const { AROUNDCOMPANY }  = require("../../helpers/testHelpers");
 let { description, handle, logo_url, name, num_employees } = AROUNDCOMPANY;
 
 beforeEach(async function () {
-
+  await dropAllTables();
   await createAllTables();
   await insertIntoCompanies(AROUNDCOMPANY);
 }
 );
 
 afterEach(async function () {
-  await db.query(`DROP TABLE IF EXISTS companies, jobs`);
+  await dropAllTables();
 });
 
 afterAll(async function () {

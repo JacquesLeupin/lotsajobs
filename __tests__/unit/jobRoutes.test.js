@@ -4,12 +4,13 @@ const app = require("../../app");
 let db = require("../../db");
 
 // import helper stuff for creating databases
-const { createAllTables, insertIntoCompanies, insertIntoJobs } = require("../../helpers/testHelpers");
+const { createAllTables,  dropAllTables, insertIntoCompanies, insertIntoJobs } = require("../../helpers/testHelpers");
 
 const { UCSF, JRSPECIALIST } = require("../../helpers/testHelpers");
 
 // Create a new table and insert before each database
 beforeEach(async function () {
+  await dropAllTables();
   await createAllTables();
   await insertIntoCompanies(UCSF);
   await insertIntoJobs(JRSPECIALIST);
@@ -17,8 +18,7 @@ beforeEach(async function () {
 
 // Drop entire table
 afterEach(async function () {
-
-  await db.query(`DROP TABLE IF EXISTS companies, jobs`);
+  await dropAllTables();
 });
 
 // End the database session
