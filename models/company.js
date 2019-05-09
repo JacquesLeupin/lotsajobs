@@ -79,8 +79,9 @@ class Company {
 
         // Build the base query based off the whereStatements, if they provided any
         if (whereStatements.length > 0) {
-            baseQuery = ' WHERE ' +  whereStatements.join(' AND ')
+            baseQuery += ' WHERE ' +  whereStatements.join(' AND ')
         }
+
         const result = await db.query(baseQuery, queryValues)
         return result.rows
     }

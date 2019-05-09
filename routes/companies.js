@@ -25,6 +25,7 @@ router.get("/", async function (req, res, next) {
       const company = await Company.findCompanies(req.query)
       return res.json({ company })
     }
+
   } catch (err) {
     return next(err)
   }

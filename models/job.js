@@ -28,34 +28,29 @@ class Job {
         const { title, min_salary, min_equity } = data
         let baseQuery = `SELECT title, company_handle FROM jobs`
 
-        let whereStatements = []
-        let queryValues = []
-        let counter = 1
+        // Holds all the conditionals in an array 
+        let whereStatements = [] // Array of ["name LIKE $1",  "num_employees > $2", "num_employees < $1"]
+        let queryValues = [] // queryValues that correspond to the $1, $2, $3
+        
+        let counter = 1 // Counter keeps track of the $1.. $2.
 
-        if (title) {
-            whereStatements.push(`title LIKE $${counter}`)
-            queryValues.push(title)
-            counter++
-        }
+        // prefixes for find companies
+        let wherePrefixes = ["title LIKE ", "salary >", "equity >"]
 
-        if (min_salary) {
-            whereStatements.push(`salary> $${counter}`)
-            queryValues.push(min_salary)
-            counter++
-        }
-
-        if (min_equity) {
-            whereStatements.push(`equity> $${counter}`)
-            queryValues.push(min_equity)
-            counter++
+        // each loop appends  "title LIKE $1", "salary > $2", "equity > $3", etc. if they exist
+        for (let [idx, value] of [title, min_salary, min_equity].entries()) {
+            if (value) {
+                whereStatements.push(`${wherePrefixes[idx]}$${counter}`)
+                queryValues.push(value)
+                counter++ 
+            }
         }
 
         if (whereStatements.length > 0) {
-            whereStatements = whereStatements.join(' AND ')
-            baseQuery += ' WHERE ' + whereStatements
+            baseQuery += ' WHERE ' + whereStatements.join(' AND ')
         }
-
         const result = await db.query(baseQuery, queryValues)
+
         return result.rows
     }
 
