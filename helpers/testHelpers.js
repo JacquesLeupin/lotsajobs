@@ -44,7 +44,7 @@ const ADMIN = {
   email: "admin@admin.com",
   photo_url: "pro.com",
   is_admin: true
-}
+};
 
 
 async function createAllTables() {
@@ -100,7 +100,7 @@ async function insertIntoCompanies(company) {
 }
 
 async function insertIntoJobs(job) {
-  db.query(`INSERT INTO jobs (
+  await db.query(`INSERT INTO jobs (
     title,
     salary,
     equity,
@@ -115,11 +115,31 @@ async function insertIntoJobs(job) {
   ]);
 }
 
+async function insertIntoUsers(user) {
+
+  await db.query(`INSERT INTO users (
+      username,
+      password,
+      first_name,
+      last_name,
+      email,
+      photo_url)
+      VALUES ($1, $2, $3, $4, $5, $6)`,[
+    user.username,
+    user.password,
+    user.first_name,
+    user.last_name,
+    user.email,
+    user.photo_url
+  ]);
+}
+
 module.exports = {
   createAllTables,
   dropAllTables,
   insertIntoCompanies,
   insertIntoJobs,
+  insertIntoUsers,
   CURRENT_TIME_STAMP,
   JRSPECIALIST,
   UCSF,

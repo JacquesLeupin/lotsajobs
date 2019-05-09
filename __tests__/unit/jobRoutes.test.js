@@ -62,7 +62,7 @@ describe("POST /jobs", function () {
           "instance requires property \"salary\"",
           "instance requires property \"equity\"", "instance requires property \"company_handle\""], "status": 400
     });
-  })
+  });
 });
 
 // Read routes

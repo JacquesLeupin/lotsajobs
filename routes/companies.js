@@ -37,7 +37,9 @@ router.get("/", ensureLoggedIn, async function (req, res, next) {
 });
 
 // Creation of a company
-router.post("/", validateCompanyData, ensureAdmin, async function (req, res, next) {
+router.post("/", validateCompanyData, ensureLoggedIn, ensureAdmin, async function (req, res, next) {
+  
+  console.log("done with ensureAdmin");
   try {
     const companies = await Company.create(req.body);
     return res.json(companies);
