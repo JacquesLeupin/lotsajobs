@@ -2,7 +2,7 @@ const express = require("express")
 const Company = require("../models/company")
 const jsonschema = require("jsonschema")
 const ExpressError = require("../helpers/expressError")
-const { validateCompanyData, validateCompanyPatchData } = require('../middleware')
+const { validateCompanyData, validateCompanyPatchData } = require('../middleware/inputDataValidation')
 
 const router = new express.Router()
 

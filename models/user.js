@@ -21,7 +21,7 @@ class User {
         return result.rows[0]
     }
 
-    static async findAll (){
+    static async findAll() {
         const results = await db.query(`SELECT * FROM users`)
         return results.rows
     }

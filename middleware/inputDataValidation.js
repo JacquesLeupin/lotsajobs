@@ -1,11 +1,11 @@
 const jsonschema = require("jsonschema")
-const companySchema = require("./schemas/companySchema.json")
-const companyPatchSchema = require("./schemas/companyPatchSchema.json")
-const jobSchema = require("./schemas/jobSchema.json")
-const jobPatchSchema = require("./schemas/jobPatchSchema.json")
-const userSchema = require("./schemas/userSchema.json")
-const userPatchSchema = require("./schemas/userPatchSchema.json")
-const ExpressError = require("./helpers/expressError")
+const companySchema = require("../schemas/companySchema.json")
+const companyPatchSchema = require("../schemas/companyPatchSchema.json")
+const jobSchema = require("../schemas/jobSchema.json")
+const jobPatchSchema = require("../schemas/jobPatchSchema.json")
+const userSchema = require("../schemas/userSchema.json")
+const userPatchSchema = require("../schemas/userPatchSchema.json")
+const ExpressError = require("../helpers/expressError")
 
 
 /** Validator for company data. Ensures the keys:
@@ -85,4 +85,4 @@ function validateUserPatchData(req, res, next) {
   } 
   return next()
 }
-module.exports = { validateCompanyData, validateCompanyPatchData, validateJobData,validateJobPatchData, validateUserData, validateUserPatchData }
+module.exports = { validateCompanyData, validateCompanyPatchData, validateJobData, validateJobPatchData, validateUserData, validateUserPatchData }
