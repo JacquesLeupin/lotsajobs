@@ -48,7 +48,7 @@ describe("GET /companies", function () {
     })
     // Test the gets with query parameters
 
-    test("Gets a list of all companies", async function () {
+    test("Get a list of all companies with the search keyword", async function () {
         const response = await request(app).get(`/companies?search=getAround`);
         expect(response.statusCode).toBe(200);
         expect(response.body).toEqual({ "company": [{ "handle": "AROUND", "name": "getAround" }] })

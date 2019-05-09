@@ -6,25 +6,25 @@ const app = require("../../app")
 let db = require("../../db")
 
 const jsJob = {
-  title: "Junior Specialist",
+  title: "JrSpecialist",
   salary: 35678,
   equity: 0.1,
   company_handle: "UCSF",
 }
 
 const UCSF = {
-  "handle": "UCSF",
-  "name": "University of California San Francisco",
-  "num_employees": 2000,
-  "description": "hospital stuff",
-  "logo_url": "lolgetoutofhere"
+  handle: "UCSF",
+  name: "University of California San Francisco",
+  num_employees: 2000,
+  description: "hospital stuff",
+  logo_url: "lolgetoutofhere"
 }
 
 
-beforeEach(function () {
+beforeEach(async function () {
 
   // Insert a company for that JOB
-  db.query(`INSERT INTO companies (
+  await db.query(`INSERT INTO companies (
               handle,
               name,
               num_employees,
@@ -56,11 +56,36 @@ beforeEach(function () {
 })
 
 
-afterEach(function () {
+afterEach(async function () {
 
-  db.query(`TRUNCATE TABLE jobs, companies`)
+  await db.query(`TRUNCATE TABLE jobs, companies`)
 })
 
+afterAll(async function () {
+
+  await db.query(`
+  DROP TABLE IF EXISTS companies, jobs;
+  
+  CREATE TABLE companies (
+    handle TEXT PRIMARY KEY,
+    name TEXT,
+    num_employees INTEGER,
+    description TEXT, 
+    logo_url TEXT
+  );
+  
+  CREATE TABLE jobs (
+    id SERIAL PRIMARY KEY,
+    title TEXT NOT NULL,
+    salary FLOAT NOT NULL,
+    equity FLOAT CHECK (equity > 0 AND equity <1) NOT NULL, 
+    company_handle TEXT REFERENCES companies ON DELETE CASCADE,
+    date_posted TIMESTAMP WITHOUT TIME ZONE NOT NULL
+  );
+  
+  `)
+
+})
 
 
 // create a new job
@@ -96,38 +121,68 @@ describe("POST /jobs", function () {
   // })
 })
 
-    // CRUD - Read route 
-    // describe("GET /companies", function () {
+// Read routes: get jobs  
+describe("READ: GET /jobs", function () {
 
+  // Lists all jobs if no query strings are passed
+  test("Gets a list of all jobs", async function () {
+    const response = await request(app).get(`/jobs`);
+    expect(response.statusCode).toBe(200);
+    expect(response.body.jobs).toHaveLength(1);
+  })
 
-    //   test("Gets a list of all companies", async function () {
-    //     const response = await request(app).get(`/companies`);
-    //     expect(response.statusCode).toBe(200);
-    //     expect(response.body).toEqual({ "companies": [{ "description": "Where Jax used to work", "handle": "AROUND", "logo_url": "lolgetoutofhere", "name": "getAround", "num_employees": 2000 }] })
-    //   })
-    //   // Test the gets with query parameters
+  // Test the gets with query parameters
+  test("Gets a list of all companies that match the title", async function () {
+    const response = await request(app).get(`/jobs?title=JrSpecialist`);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({ "jobs": [{ "company_handle" : "UCSF", "title" : "JrSpecialist" }]})
+  })
 
-    //   test("Gets a list of all companies", async function () {
-    //     const response = await request(app).get(`/companies?search=getAround`);
-    //     expect(response.statusCode).toBe(200);
-    //     expect(response.body).toEqual({ "company": [{ "handle": "AROUND", "name": "getAround" }] })
-    //   })
+  test("Return error 400 if max_salary is less than min salary", async function () {
+    const response = await request(app).get(`/jobs?title=JrSpecialistd&min_salary=3000&max_salary=200`);
+    // expect(response.statusCode).toBe(400);
+    expect(response.body).toEqual({ "message": "Please give a valid range", "status": 400 })
+  })
 
-    //   test("Return 404 for invalid query params", async function () {
-    //     const response = await request(app).get(`/companies?search=getAround&min_employees=3000&max_employees=200`);
-    //     expect(response.statusCode).toBe(400);
-    //     expect(response.body).toEqual({ "message": "Please give a valid range", "status": 400 })
-    //   })
+  test("Return specific company based on valid query params", async function () {
+    const response = await request(app).get(`/jobs?min_salary=3000&max_salary=45000`);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({ "jobs": [{ "company_handle" : "UCSF", "title" : "JrSpecialist" }]})
+  })
 
-    //   test("Return specific company based on valid query params", async function () {
-    //     const response = await request(app).get(`/companies?min_employees=300&max_employees=2001`);
-    //     expect(response.statusCode).toBe(200);
-    //     expect(response.body).toEqual({ "company": [{ "handle": "AROUND", "name": "getAround" }] })
-    //   })
+  test("Return nothing if no jobs satisfy valid query params", async function () {
+    const response = await request(app).get(`/jobs?min_salary=999999`);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({ "jobs": []})
+  })
+})
 
-    //   test("Return nothing if no companies satisfy valid query params", async function () {
-    //     const response = await request(app).get(`/companies?min_employees=300&max_employees=2000`);
-    //     expect(response.statusCode).toBe(200);
-    //     expect(response.body).toEqual({ "company": [] })
-    //   })
-    // })
+// Update : 
+describe("PATCH /jobs/:id", function () {
+  test("Successfully updates a single job posting by id", async function () {
+
+    const result = await db.query(`SELECT * from jobs`);
+    console.log("ROWS", result.rows[0]);
+      const response = await request(app)
+          .patch(`/jobs/1`)
+          .send({
+            title: "JrSpecialistII",
+            salary: 40000,
+            equity: 0.2,
+            company_handle: "UCSF",
+          })
+
+      expect(response.statusCode).toBe(200);
+
+      expect(response.body).toEqual({
+      })
+  })
+
+  // invalid handle
+  test("Responds with 404 if id invalid", async function () {
+      const response = await request(app).patch(`/jobs/asdlkfjlasdjf`)
+
+      expect(response.statusCode).toBe(404)
+      expect(response.body.message).toEqual("Job not found!")
+  });
+});
