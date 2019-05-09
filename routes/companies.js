@@ -21,9 +21,8 @@ router.get("/", async function (req, res, next) {
         return next(new ExpressError("Please give a valid range", 400))
       }
 
-      // Nothing wrong with query paramters, find the specific companie(s) matching those queries
+      // Nothing wrong with query parameters, find the specific companie(s) matching those queries
       const company = await Company.findCompanies(req.query)
-      console.log(company)
       return res.json({ company })
     }
   } catch (err) {

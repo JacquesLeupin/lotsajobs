@@ -1,22 +1,30 @@
 const db = require("../db")
 const partialUpdate = require("../helpers/partialUpdate")
 
+
+/** Static Job class to handle the db queries in PSQL.  */
 class Job {
-    
-    // finds all jobs, ordered by date
-    static async findAll (){
+
+    /** Returns all the rows of the job table as 
+     * an array of  {id, title, equity, company_handle, date_posted}
+     */
+    static async findAll() {
         const results = await db.query(`SELECT * FROM jobs ORDER BY date_posted DESC`)
         return results.rows
     }
 
-    // finds a specific job, based on that job's ID
+    /** Finds a specific job, based on that job's ID
+     * Returns { id, title, equity, company_handle, date_posted }
+     */
     static async findById(id) {
         const result = await db.query(`SELECT * FROM jobs WHERE id=$1`, [id])
         return result.rows[0]
     }
 
-    // finds jobs based off of optional query parameters
-    static async findJobs(data){
+    /** Finds all jobs based on the query parameters 
+     * Returns an array of { id, title, equity, company_handle, date_posted }
+     */
+    static async findJobs(data) {
         const { title, min_salary, min_equity } = data
         let baseQuery = `SELECT title, company_handle FROM jobs`
 
@@ -51,7 +59,10 @@ class Job {
         return result.rows
     }
 
-    //updates specific jobs in the jobs table
+    /** Updates the row matching the passed id with an object of key:value pairs
+     * @params columnsToUpdate - POJO of column : value pairs, for columns to update and values to update with.
+     * Returns the same object as { id, title, equity, company_handle, date_posted }
+     */
     static async update(id, columnsToUpdate) {
         let { query, values } = partialUpdate('jobs', columnsToUpdate, 'id', id)
 
@@ -59,7 +70,10 @@ class Job {
         return result.rows[0]
     }
 
-    //create a job in the jobs database
+    /** Creates a row and inserts it into the table for jobs
+     * Returns  the object inserted as
+     * { id, title, equity, company_handle, date_posted }
+     */
     static async create(data) {
 
         const { title, salary, equity, company_handle } = data
@@ -77,7 +91,9 @@ class Job {
         return result.rows[0]
     }
 
-    //delete a job, based on the job's ID
+    /** Deletes the row in the jobs table based on the id. Returns the entire row deleted.
+     * as : { id, title, equity, company_handle, date_posted }
+     */
     static async delete(id) {
         const result = await db.query(`DELETE FROM jobs WHERE id=$1 RETURNING *`, [id])
         return result.rows[0]

@@ -91,7 +91,6 @@ class Company {
             whereStatements = whereStatements.join(' AND ')
             baseQuery += ' WHERE ' + whereStatements
         }
-        console.log(baseQuery, "HEREEEEE", queryValues)
         const result = await db.query(baseQuery, queryValues)
         return result.rows
     }
