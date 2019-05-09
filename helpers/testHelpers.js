@@ -1,7 +1,30 @@
 /** Helper functions to use for the test files */
 let db = require("../db");
 
+// Helper constants
 const CURRENT_TIME_STAMP = "2019-05-09T00:56:21.186Z";
+const JRSPECIALIST = {
+  title: "JrSpecialist",
+  salary: 35678,
+  equity: 0.1,
+  company_handle: "UCSF",
+};
+
+const UCSF = {
+  handle: "UCSF",
+  name: "University of California San Francisco",
+  num_employees: 2000,
+  description: "hospital stuff",
+  logo_url: "lolgetoutofhere"
+};
+
+const AROUNDCOMPANY = {
+  "handle": "AROUND",
+  "name": "getAround",
+  "num_employees": 2000,
+  "description": "Where Jax used to work",
+  "logo_url": "lolgetoutofhere"
+};
 
 
 async function createAllTables() {
@@ -61,5 +84,8 @@ module.exports = {
   createAllTables,
   insertIntoCompanies,
   insertIntoJobs,
-  CURRENT_TIME_STAMP
+  CURRENT_TIME_STAMP,
+  JRSPECIALIST,
+  UCSF,
+  AROUNDCOMPANY
 };

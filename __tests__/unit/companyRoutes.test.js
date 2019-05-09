@@ -7,22 +7,16 @@ let db = require("../../db");
 const { createAllTables, insertIntoCompanies } = require("../../helpers/testHelpers");
 
 
-let companyOne = {
-  "handle": "AROUND",
-  "name": "getAround",
-  "num_employees": 2000,
-  "description": "Where Jax used to work",
-  "logo_url": "lolgetoutofhere"
-};
-
+// Grab a sample testing company, the AROUND COMPANY
+const { AROUNDCOMPANY }  = require("../../helpers/testHelpers");
+let { description, handle, logo_url, name, num_employees } = AROUNDCOMPANY;
 
 beforeEach(async function () {
 
   await createAllTables();
-  await insertIntoCompanies(companyOne);
+  await insertIntoCompanies(AROUNDCOMPANY);
 }
 );
-
 
 afterEach(async function () {
   await db.query(`DROP TABLE IF EXISTS companies, jobs`);
@@ -32,42 +26,67 @@ afterAll(async function () {
   await db.end();
 });
 
-
-// CRUD - Read route 
+// Read route for companies 
 describe("GET /companies", function () {
-
 
   test("Gets a list of all companies", async function () {
     const response = await request(app).get(`/companies`);
-    // expect(response.statusCode).toBe(200);
-    expect(response.body).toEqual({ "companies": [{ "description": "Where Jax used to work", "handle": "AROUND", "logo_url": "lolgetoutofhere", "name": "getAround", "num_employees": 2000 }] });
-  });
-  // Test the gets with query parameters
 
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({
+      "companies": [{
+        "description": description,
+        "handle": handle,
+        "logo_url": logo_url,
+        "name": name,
+        "num_employees": num_employees
+      }]
+    });
+  });
+
+  // Test the gets with query parameters
   test("Get a list of all companies with the search keyword", async function () {
     const response = await request(app).get(`/companies?search=getAround`);
-    // expect(response.statusCode).toBe(200);
-    expect(response.body).toEqual({ "company": [{ "handle": "AROUND", "name": "getAround" }] });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toEqual({
+      "company": [{
+        "handle": handle,
+        "name": name
+      }]
+    });
   });
 
   test("Return 404 for invalid query params", async function () {
     const response = await request(app).get(`/companies?search=getAround&min_employees=3000&max_employees=200`);
+
     expect(response.statusCode).toBe(400);
-    expect(response.body).toEqual({ "message": "Please give a valid range", "status": 400 });
+    expect(response.body).toEqual({
+      "message": "Please give a valid range",
+      "status": 400
+    });
   });
 
   test("Return specific company based on valid query params", async function () {
     const response = await request(app).get(`/companies?min_employees=300&max_employees=2001`);
+    
     expect(response.statusCode).toBe(200);
-    expect(response.body).toEqual({ "company": [{ "handle": "AROUND", "name": "getAround" }] });
+    expect(response.body).toEqual({
+      "company": [{
+        "handle": handle,
+        "name": name
+      }]
+    });
   });
 
   test("Return nothing if no companies satisfy valid query params", async function () {
     const response = await request(app).get(`/companies?min_employees=300&max_employees=2000`);
-    // expect(response.statusCode).toBe(200);
+    
+    expect(response.statusCode).toBe(200);
     expect(response.body).toEqual({ "company": [] });
   });
 });
+
 
 // create
 describe("POST /companies", function () {

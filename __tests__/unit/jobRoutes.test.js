@@ -6,28 +6,13 @@ let db = require("../../db");
 // import helper stuff for creating databases
 const { createAllTables, insertIntoCompanies, insertIntoJobs } = require("../../helpers/testHelpers");
 
-// Test job and test company
-const jsJob = {
-  title: "JrSpecialist",
-  salary: 35678,
-  equity: 0.1,
-  company_handle: "UCSF",
-};
-
-const UCSF = {
-  handle: "UCSF",
-  name: "University of California San Francisco",
-  num_employees: 2000,
-  description: "hospital stuff",
-  logo_url: "lolgetoutofhere"
-};
-
+const { UCSF, JRSPECIALIST } = require("../../helpers/testHelpers");
 
 // Create a new table and insert before each database
 beforeEach(async function () {
   await createAllTables();
   await insertIntoCompanies(UCSF);
-  await insertIntoJobs(jsJob);
+  await insertIntoJobs(JRSPECIALIST);
 });
 
 // Drop entire table
@@ -62,17 +47,22 @@ describe("POST /jobs", function () {
 
   });
 
-  // test("Route returns 404 if invalid keys in the job posting", async function () {
-  //   const response = await request(app).post(`/jobs`)
-  //     .send({
-  //       asdf: "32432432",
-  //       adsfasd: 1234532432,
-  //       adsfads: 32432432,
-  //       adfdas: ""
-  //     });
-  //   expect(response.statusCode).toBe(400);
-  //   expect(response.body).toEqual();
-  // })
+  test("Route returns 400 if invalid keys in the job posting", async function () {
+    const response = await request(app).post(`/jobs`)
+      .send({
+        asdf: "32432432",
+        adsfasd: 1234532432,
+        adsfads: 32432432,
+        adfdas: ""
+      });
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toEqual({
+      "message":
+        ["instance requires property \"title\"",
+          "instance requires property \"salary\"",
+          "instance requires property \"equity\"", "instance requires property \"company_handle\""], "status": 400
+    });
+  })
 });
 
 // Read routes
