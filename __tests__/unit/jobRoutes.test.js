@@ -3,6 +3,9 @@ const request = require("supertest");
 const app = require("../../app");
 let db = require("../../db");
 
+// import helper stuff for creating databases
+const { createAllTables, insertIntoCompanies, insertIntoJobs } = require("../../helpers/testHelpers");
+
 // Test job and test company
 const jsJob = {
   title: "JrSpecialist",
@@ -19,62 +22,12 @@ const UCSF = {
   logo_url: "lolgetoutofhere"
 };
 
-// Mock time stamp
-const CURRENT_TIME_STAMP = "2019-05-09T00:56:21.186Z";
-
 
 // Create a new table and insert before each database
 beforeEach(async function () {
-
-  await db.query(`
-          CREATE TABLE companies (
-          handle TEXT PRIMARY KEY,
-          name TEXT,
-          num_employees INTEGER,
-          description TEXT, 
-          logo_url TEXT
-          );
-
-          CREATE TABLE jobs (
-          id SERIAL PRIMARY KEY,
-          title TEXT NOT NULL,
-          salary FLOAT NOT NULL,
-          equity FLOAT CHECK (equity > 0 AND equity <1) NOT NULL, 
-          company_handle TEXT REFERENCES companies ON DELETE CASCADE,
-          date_posted TIMESTAMP WITHOUT TIME ZONE NOT NULL
-          );`);
-
-  // Insert a company for that JOB
-  await db.query(`INSERT INTO companies (
-              handle,
-              name,
-              num_employees,
-              description,
-              logo_url)
-              VALUES ($1, $2, $3, $4, $5)`, [
-    UCSF.handle,
-    UCSF.name,
-    UCSF.num_employees,
-    UCSF.description,
-    UCSF.logo_url
-  ]);
-
-
-  // Insert a job
-  db.query(`INSERT INTO jobs (
-                title,
-                salary,
-                equity,
-                company_handle,
-                date_posted)
-                VALUES ($1, $2, $3, $4, $5)`, [
-    jsJob.title,
-    jsJob.salary,
-    jsJob.equity,
-    jsJob.company_handle,
-    CURRENT_TIME_STAMP
-  ]);
-
+  await createAllTables();
+  await insertIntoCompanies(UCSF);
+  await insertIntoJobs(jsJob);
 });
 
 // Drop entire table
@@ -157,7 +110,6 @@ describe("READ: GET /jobs", function () {
 describe("PATCH /jobs/:id", function () {
   test("Successfully updates a single job posting by id", async function () {
 
-    const result = await db.query(`SELECT * from jobs`);
     const response = await request(app)
       .patch(`/jobs/1`)
       .send({

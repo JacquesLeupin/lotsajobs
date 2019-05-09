@@ -4,6 +4,8 @@ const request = require("supertest");
 const app = require("../../app");
 
 let db = require("../../db");
+const { createAllTables, insertIntoCompanies } = require("../../helpers/testHelpers");
+
 
 let companyOne = {
   "handle": "AROUND",
@@ -16,37 +18,8 @@ let companyOne = {
 
 beforeEach(async function () {
 
-  await db.query(`
-                CREATE TABLE companies (
-                handle TEXT PRIMARY KEY,
-                name TEXT,
-                num_employees INTEGER,
-                description TEXT, 
-                logo_url TEXT
-                );
-
-                CREATE TABLE jobs (
-                id SERIAL PRIMARY KEY,
-                title TEXT NOT NULL,
-                salary FLOAT NOT NULL,
-                equity FLOAT CHECK (equity > 0 AND equity <1) NOT NULL, 
-                company_handle TEXT REFERENCES companies ON DELETE CASCADE,
-                date_posted TIMESTAMP WITHOUT TIME ZONE NOT NULL
-                );`);
-
-  await db.query(`INSERT INTO companies (
-                handle,
-                name,
-                num_employees,
-                description,
-                logo_url)
-                VALUES ($1, $2, $3, $4, $5)`, [
-    companyOne.handle,
-    companyOne.name,
-    companyOne.num_employees,
-    companyOne.description,
-    companyOne.logo_url
-  ]);
+  await createAllTables();
+  await insertIntoCompanies(companyOne);
 }
 );
 
