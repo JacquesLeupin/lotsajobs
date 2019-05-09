@@ -13,7 +13,27 @@ let companyOne = {
     "logo_url": "lolgetoutofhere"
 }
 
+
 beforeEach(async function () {
+
+    await db.query(`
+                CREATE TABLE companies (
+                handle TEXT PRIMARY KEY,
+                name TEXT,
+                num_employees INTEGER,
+                description TEXT, 
+                logo_url TEXT
+                );
+
+                CREATE TABLE jobs (
+                id SERIAL PRIMARY KEY,
+                title TEXT NOT NULL,
+                salary FLOAT NOT NULL,
+                equity FLOAT CHECK (equity > 0 AND equity <1) NOT NULL, 
+                company_handle TEXT REFERENCES companies ON DELETE CASCADE,
+                date_posted TIMESTAMP WITHOUT TIME ZONE NOT NULL
+                );`)
+
     await db.query(`INSERT INTO companies (
                 handle,
                 name,
@@ -32,11 +52,10 @@ beforeEach(async function () {
 
 
 afterEach(async function () {
-
-    await db.query(`TRUNCATE TABLE companies CASCADE`)
+    await db.query(`DROP TABLE IF EXISTS companies, jobs`)
 })
 
-afterAll(async function() {
+afterAll(async function () {
     await db.end();
 })
 
@@ -80,8 +99,6 @@ describe("GET /companies", function () {
 // create
 describe("POST /companies", function () {
 
-
-
     test("Route returns 404 if invalid sending", async function () {
         const response = await request(app).post(`/companies`)
             .send({ "lksadjflkasd": "dklsafjs", "jflksadjf": "bogus" });
@@ -100,7 +117,6 @@ describe("POST /companies", function () {
 
 
     // Make another bogus company
-
     let companyTwo = {
         "handle": "GGLY",
         "name": "Goooooogly",
