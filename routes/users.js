@@ -11,6 +11,8 @@ router.get("/", async function (req, res, next) {
     try {
       // If there are no query parameters, \
         const users = await User.findAll()
+        
+
         return res.json({ users })
     } catch (err) {
       return next(err)
