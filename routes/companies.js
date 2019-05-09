@@ -23,7 +23,6 @@ router.get("/", async function (req, res, next) {
 
       // Nothing wrong with query paramters, find the specific companie(s) matching those queries
       const company = await Company.findCompanies(req.query)
-      console.log(company)
       return res.json({ company })
     }
   } catch (err) {

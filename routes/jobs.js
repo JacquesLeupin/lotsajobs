@@ -56,7 +56,7 @@ router.get("/", async function (req, res, next) {
       const { id } = req.params
         // if job doesn't exist, we can't update
       if (!(await Job.findById(id))) {
-        return next(new ExpressError("Job not found!", 404))
+        return next(new ExpressError("Job not found", 404))
       }
       // Update the job
       const job = await Job.update(id, req.body)
