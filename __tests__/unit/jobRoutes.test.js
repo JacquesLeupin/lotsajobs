@@ -158,7 +158,7 @@ describe("PATCH /jobs/:id", function () {
   test("Successfully updates a single job posting by id", async function () {
 
     const result = await db.query(`SELECT * from jobs`);
-    const response = await request(app)
+    const response = await request(app)je
       .patch(`/jobs/1`)
       .send({
         title: "JrSpecialistII",

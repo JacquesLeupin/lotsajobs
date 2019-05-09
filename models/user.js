@@ -26,6 +26,23 @@ class User {
         return results.rows
     }
 
+    static async findByUsername(username) {
+        const result = await db.query(`SELECT * FROM users WHERE username=$1`, [username])
+        return result.rows[0]
+    }
+
+    static async update(username, columnsToUpdate) {
+        let { query, values } = partialUpdate('users', columnsToUpdate, 'username', username)
+
+        const result = await db.query(query, values)
+        return result.rows[0]
+    }
+
+    static async delete(username) {
+        const result = await db.query(`DELETE FROM users WHERE username=$1 RETURNING *`, [username])
+        return result.rows[0]
+    }
+
 }
 
 module.exports = User
