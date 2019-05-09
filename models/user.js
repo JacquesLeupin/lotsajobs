@@ -1,5 +1,6 @@
 const db = require("../db");
 const partialUpdate = require("../helpers/partialUpdate");
+const bcrypt = require("bcrypt");
 
 /** Static User class to handle the db queries in PSQL.  */
 class User {
@@ -8,6 +9,7 @@ class User {
   static async create(data) {
 
     const { username, password, first_name, last_name, email, photo_url } = data;
+    const hashedPassword = await bcrypt.hash(password, 12);
     const result = await db.query(
       `INSERT INTO users (
                 username,
@@ -18,7 +20,7 @@ class User {
                 photo_url)
             VALUES ($1, $2, $3, $4, $5, $6)
             RETURNING *`,
-      [username, password, first_name, last_name, email, photo_url]
+      [username, hashedPassword, first_name, last_name, email, photo_url]
     );
     return result.rows[0];
   }
@@ -33,8 +35,19 @@ class User {
 
   /** Returns the row from the user table as **/
   static async authenticate (username, password){
-    const result = await db.query(`SELECT * FROM USERS WHERE USERNAME = $1 AND PASSWORD = $2`, [username, password]);
-    return result.rows[0];
+
+    // grabbing user from db based off of username
+    const result = await db.query(`SELECT * FROM USERS WHERE USERNAME = $1`, [username]);
+
+    const user = result.rows[0];
+
+    // check if provided user password matches hashed password in db
+    if(await bcrypt.compare(password, user.password)){
+      return user;
+    }
+    else{
+      return false;
+    }
   }
 
   /* Returns a user object when passed a username */

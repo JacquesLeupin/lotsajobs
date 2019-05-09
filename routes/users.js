@@ -6,6 +6,7 @@ const jwt = require("jsonwebtoken");
 const { validateUserData, validateUserPatchData } = require('../middleware/inputDataValidation');
 const { SECRET_KEY } = require('../config');
 const { ensureCorrectUser } = require("../middleware/auth");
+const bcrypt = require('bcrypt');
 
 const router = new express.Router();
 

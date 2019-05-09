@@ -11,8 +11,10 @@ router.post("/", async function(req, res, next) {
   try {
 
     const { username, password } = req.body;
+    console.log(password)
     //checking to see if user exists in our db with username/password
     const user = await User.authenticate(username, password);
+    console.log(user.password)
     const isAdmin = user.is_admin;
 
     if (user) {
