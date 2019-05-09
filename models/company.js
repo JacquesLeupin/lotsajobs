@@ -60,36 +60,26 @@ class Company {
         let baseQuery = `SELECT handle, name FROM companies`
         
         // Holds all the conditionals in an array 
-        let whereStatements = []
+        let whereStatements = [] // Array of ["name LIKE $1",  "num_employees > $2", "num_employees < $1"]
+        let queryValues = [] // queryValues that correspond to the $1, $2, $3
         
-        // Holds all the queryValues to be passed in. ($1, $2, $3, $4... etc)
-        let queryValues = []
-        
-        // Counter keeps track of the $1.. $2.
-        let counter = 1
+        let counter = 1 // Counter keeps track of the $1.. $2.
 
-        if (search) {
-            whereStatements.push(`name LIKE $${counter}`)
-            queryValues.push(search)
-            counter++
+        // prefixes for find companies
+        let wherePrefixes = ["name LIKE ", "num_employees >", "num_employees <"]
+
+        // each loop appends .., "name LIKE $1",  "num_employees > $2", etc. if they exist
+        for (let [idx, value] of [search, min_employees, max_employees].entries()) {
+            if (value) {
+                whereStatements.push(`${wherePrefixes[idx]}$${counter}`)
+                queryValues.push(value)
+                counter++ 
+            }
         }
 
-        if (min_employees) {
-            whereStatements.push(`num_employees> $${counter}`)
-            queryValues.push(min_employees)
-            counter++
-        }
-
-        if (max_employees) {
-            whereStatements.push(`num_employees< $${counter}`)
-            queryValues.push(max_employees)
-            counter++
-        }
-
-        // Build the base query based off the whereStatements
+        // Build the base query based off the whereStatements, if they provided any
         if (whereStatements.length > 0) {
-            whereStatements = whereStatements.join(' AND ')
-            baseQuery += ' WHERE ' + whereStatements
+            baseQuery = ' WHERE ' +  whereStatements.join(' AND ')
         }
         const result = await db.query(baseQuery, queryValues)
         return result.rows
