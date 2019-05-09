@@ -21,9 +21,26 @@ class User {
         return result.rows[0]
     }
 
-    static async findAll (){
+    static async findAll() {
         const results = await db.query(`SELECT * FROM users`)
         return results.rows
+    }
+
+    static async findByUsername(username) {
+        const result = await db.query(`SELECT * FROM users WHERE username=$1`, [username])
+        return result.rows[0]
+    }
+
+    static async update(username, columnsToUpdate) {
+        let { query, values } = partialUpdate('users', columnsToUpdate, 'username', username)
+
+        const result = await db.query(query, values)
+        return result.rows[0]
+    }
+
+    static async delete(username) {
+        const result = await db.query(`DELETE FROM users WHERE username=$1 RETURNING *`, [username])
+        return result.rows[0]
     }
 
 }

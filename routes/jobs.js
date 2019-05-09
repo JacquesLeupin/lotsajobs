@@ -2,7 +2,7 @@ const express = require("express")
 const Job = require("../models/job")
 const jsonschema = require("jsonschema")
 const ExpressError = require("../helpers/expressError")
-const { validateJobData, validateJobPatchData } = require('../middleware')
+const { validateJobData, validateJobPatchData } = require('../middleware/inputDataValidation')
 
 const router = new express.Router()
 

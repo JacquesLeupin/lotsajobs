@@ -2,90 +2,81 @@ const express = require("express")
 const User = require("../models/user")
 const jsonschema = require("jsonschema")
 const ExpressError = require("../helpers/expressError")
-const { CHANGEME, CHANGME } = require('../middleware')
+const { validateUserData, validateUserPatchData } = require('../middleware/inputDataValidation')
 
 const router = new express.Router()
 
-// Read companies
+// Read users
 router.get("/", async function (req, res, next) {
-    try {
-      // If there are no query parameters, \
-        const users = await User.findAll()
-        
+  try {
+    const users = await User.findAll()
+    return res.json({ users })
+  } catch (err) {
+    return next(err)
+  }
+})
 
-        return res.json({ users })
-    } catch (err) {
-      return next(err)
+// Creation of a user
+router.post("/", validateUserData, async function (req, res, next) {
+  try {
+    const user = await User.create(req.body)
+    return res.json({ user: { username: user.username, firstname: user.first_name, lastname: user.last_name, email: user.email } })
+  } catch (err) {
+    return next(err)
+  }
+})
+
+
+// Read by username. Get JSON of a specific user based on handle
+router.get("/:username", async function (req, res, next) {
+  try {
+
+    const { username } = req.params
+
+    const user = await User.findByUsername(username)
+
+    if (!user) {
+      return next(new ExpressError("User not found!", 404))
     }
-  })
-  
-  // Creation of a user
-  router.post("/", async function (req, res, next) {
-    try {
-      const user = await User.create(req.body)
-      return res.json(user)
-    } catch (err) {
-      return next(err)
+    return res.json({ user: { username: user.username, firstname: user.first_name, lastname: user.last_name, email: user.email, photo_url: user.photo_url } })
+  } catch (err) {
+    return next(err)
+  }
+})
+
+
+// Update a user based on username, with any data provided
+router.patch("/:username", validateUserPatchData, async function (req, res, next) {
+  try {
+    const { username } = req.params
+    // If the user username does not exist in the database, return a user not found.
+    if (!(await User.findByUsername(username))) {
+      return next(new ExpressError("User not found!", 404))
     }
-  })
-  
-  
-  // Read by handle. Get JSON of a specific company based on handle
-  router.get("/:handle", async function (req, res, next) {
-    try {
-  
-      const { handle } = req.params
-  
-      // Send out two db queries at same time for company and jobs
-      const companyPromise = Company.findByHandle(handle)
-      const jobsPromise = Company.findAllJobsFromCompanyHandle(handle);
-      
-      let [company, jobs] = await Promise.all([companyPromise, jobsPromise])
-      
-      // If company cannot be found, then send a not found error
-      if (!company) {
-        return next(new ExpressError("Company not found!", 404))
-      }
-      return res.json({company, jobs})
-    } catch (err) {
-      return next(err)
+
+    // Update the User
+    const user = await User.update(username, req.body)
+    return res.json({ user: { username: user.username, firstname: user.first_name, lastname: user.last_name, email: user.email, photo_url: user.photo_url } })
+  } catch (err) {
+    return next(err)
+  }
+})
+
+// Remove by username
+router.delete("/:username", async function (req, res, next) {
+  try {
+    const { username } = req.params
+    const user = await User.delete(username)
+
+    // Delete if the user exists
+    if (user) {
+      return res.json({ message: "User deleted" })
+    } else {
+      return res.json({ message: "User does not exist" })
     }
-  })
-  
-  
-  // Update a company based on handle, with any of the provided
-  router.patch("/:handle", async function (req, res, next) {
-    try {
-      const { handle } = req.params
-  
-      // If the company handle does not exist in the database, return a company not found.
-      if (!(await Company.findByHandle(handle))) {
-        return next(new ExpressError("Company not found!", 404))
-      }
-  
-      // Update the company
-      const company = await Company.update(handle, req.body)
-      return res.json({ company })
-    } catch (err) {
-      return next(err)
-    }
-  })
-  
-  // Remove by handle
-  router.delete("/:handle", async function (req, res, next) {
-    try {
-      const { handle } = req.params
-      const company = await Company.delete(handle)
-  
-      // Delete if the company exists
-      if (company) {
-        return res.json({ message: "Company deleted" })
-      } else {
-        return res.json({ message: "Company does not exist"})
-      }
-    } catch (err) {
-      return next(err)
-    }
-  })
+  } catch (err) {
+    return next(err)
+  }
+})
 
 module.exports = router
