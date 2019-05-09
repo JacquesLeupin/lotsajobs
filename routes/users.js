@@ -5,7 +5,7 @@ const ExpressError = require("../helpers/expressError");
 const jwt = require("jsonwebtoken");
 const { validateUserData, validateUserPatchData } = require('../middleware/inputDataValidation');
 const { SECRET_KEY } = require('../config');
-const { ensureCorrectUser } = require("../middleware/auth")
+const { ensureCorrectUser } = require("../middleware/auth");
 
 const router = new express.Router();
 
@@ -22,7 +22,17 @@ router.get("/", async function (req, res, next) {
 // Creation of a user
 router.post("/", validateUserData, async function (req, res, next) {
   try {
+    
+    const email = req.body.email;
+    const username = req.body.username;
+
+    // Check to see if username/email already exists in database.  If so, throw an error.
+    const alreadyTaken = await User.alreadyExists(username, email);
+    if (alreadyTaken){
+      return next(new ExpressError("${username} already taken...", 400));
+    }
     const user = await User.create(req.body);
+    
     const token = jwt.sign({user: user.username, isAdmin: user.is_admin}, SECRET_KEY);
 
     return res.json({ user: { username: user.username, firstname: user.first_name, lastname: user.last_name, email: user.email }, token: token});

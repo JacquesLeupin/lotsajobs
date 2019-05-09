@@ -11,10 +11,9 @@ router.post("/", async function(req, res, next) {
   try {
 
     const { username, password } = req.body;
+    //checking to see if user exists in our db with username/password
     const user = await User.authenticate(username, password);
-    console.log(user)
     const isAdmin = user.is_admin;
-    console.log('ISADMINHERE', isAdmin)
 
     if (user) {
       let token = jwt.sign({ username, isAdmin }, SECRET_KEY);

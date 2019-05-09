@@ -3,10 +3,8 @@
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = require("../config");
 const ExpressError = require("../helpers/expressError");
-// Middleware to track our paths
 
-
-/** Middleware: Authenticate user. */
+/** Middleware: Authenticate user and sign JWT token. */
 
 function authenticateUser(req, res, next) {
   try {
@@ -18,9 +16,8 @@ function authenticateUser(req, res, next) {
     return next();
   }
 }
-// end
 
-/** Middleware: Requires user is authenticated. */
+/** Middleware: Requires user is authenticated and ensures user is loggend in. */
 
 function ensureLoggedIn(req, res, next) {
   if (!req.user) {
@@ -30,9 +27,7 @@ function ensureLoggedIn(req, res, next) {
   }
 }
 
-// end
-
-/** Middleware: Requires correct username. */
+/** Middleware: Requires correct username, and ensures that the users is correct. */
 
 
 function ensureCorrectUser(req, res, next) {
@@ -46,7 +41,7 @@ function ensureCorrectUser(req, res, next) {
       return next();
     }
 
-    // throw an error, so we catch it in our catch, below
+    // throw an error if user isn't correct, so we catch it in our catch, below
     throw new Error();
   } catch (err) {
     return next(new ExpressError("Unauthorized", 401));
@@ -55,15 +50,11 @@ function ensureCorrectUser(req, res, next) {
 
 function ensureAdmin(req, res, next) {
   try {
+
     const tokenStr = req.body._token;
-    console.log(1, tokenStr);
     let token = jwt.verify(tokenStr, SECRET_KEY);
-    console.log(2, token);
     res.locals.username = token.username;
-    console.log(3, token.username === req.params.username)
-    console.log(4, token.username)
-    console.log(5, token.isAdmin)
-    console.log(6, token.isAdmin === true)
+
     if (token.isAdmin) {
       return next();
     }
