@@ -42,7 +42,8 @@ class User {
     const user = result.rows[0];
 
     // check if provided user password matches hashed password in db
-    if(await bcrypt.compare(password, user.password)){
+    const isValid = await bcrypt.compare(password, user.password)
+    if(isValid){
       return user;
     }
     else{

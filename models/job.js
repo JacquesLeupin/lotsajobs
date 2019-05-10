@@ -17,7 +17,7 @@ class Job {
      * Returns { id, title, equity, company_handle, date_posted }
      */
   static async findById(id) {
-    const result = await db.query(`SELECT * FROM jobs WHERE id=$1`, [id]);
+    const result = await db.query(`SELECT id, title, salary, equity, company_handle FROM jobs WHERE id=$1`, [id]);
     return result.rows[0];
   }
 
@@ -80,7 +80,7 @@ class Job {
                 company_handle,
                 date_posted)
             VALUES ($1, $2, $3, $4, current_timestamp)
-            RETURNING *`,
+            RETURNING id, title, salary, equity, company_handle`,
       [title, salary, equity, company_handle]
     );
     return result.rows[0];
@@ -90,7 +90,7 @@ class Job {
      * as : { id, title, equity, company_handle, date_posted }
      */
   static async delete(id) {
-    const result = await db.query(`DELETE FROM jobs WHERE id=$1 RETURNING *`, [id]);
+    const result = await db.query(`DELETE FROM jobs WHERE id=$1 RETURNING id, title, salary, equity, company_handle`, [id]);
     return result.rows[0];
   }
 }

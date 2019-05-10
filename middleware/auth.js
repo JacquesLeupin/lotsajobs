@@ -9,8 +9,8 @@ const ExpressError = require("../helpers/expressError");
 function authenticateUser(req, res, next) {
   try {
     const tokenFromBody = req.body._token;
-    const payload = jwt.verify(tokenFromBody, SECRET_KEY);
-    req.user = payload;
+    const token = jwt.verify(tokenFromBody, SECRET_KEY);
+    res.locals.username = token.username;
     return next();
   } catch (err) {
     return next();
@@ -20,8 +20,7 @@ function authenticateUser(req, res, next) {
 /** Middleware: Requires user is authenticated and ensures user is loggend in. */
 
 function ensureLoggedIn(req, res, next) {
-  console.log("ensureLoggedin");
-  if (!req.user) {
+  if (!res.locals.username) {
     return next({ status: 401, message: "Unauthorized - Not logged in" });
   } else {
     return next();
@@ -32,7 +31,6 @@ function ensureLoggedIn(req, res, next) {
 
 
 function ensureCorrectUser(req, res, next) {
-  console.log("ensureCorrectUser");
 
   try {
     const tokenStr = req.body._token;
@@ -52,7 +50,6 @@ function ensureCorrectUser(req, res, next) {
 }
 
 function ensureAdmin(req, res, next) {
-  console.log("ensureAdmin");
 
   try {
 
@@ -60,7 +57,6 @@ function ensureAdmin(req, res, next) {
     let token = jwt.verify(tokenStr, SECRET_KEY);
     res.locals.username = token.username;
 
-    console.log("TOKEN", token);
     if (token.isAdmin) {
       return next();
     }

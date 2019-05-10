@@ -36,7 +36,7 @@ class Company {
      */
   static async findByHandle(handle) {
     const result = await db.query(  
-      `SELECT * FROM companies 
+      `SELECT handle, name, num_employees, description, logo_url FROM companies 
                 WHERE handle=$1`, [handle]);
     return result.rows[0];
   }
