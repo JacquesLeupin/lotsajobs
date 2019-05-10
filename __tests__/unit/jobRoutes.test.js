@@ -1,12 +1,14 @@
 process.env.NODE_ENV = "test";
 const request = require("supertest");
 const app = require("../../app");
+
 let db = require("../../db");
+
 
 // import helper stuff for creating databases
 const { createAllTables,  dropAllTables, insertIntoCompanies, insertIntoJobs } = require("../../helpers/testHelpers");
 
-const { UCSF, JRSPECIALIST } = require("../../helpers/testHelpers");
+const { UCSF, JRSPECIALIST, ADMIN, NOOBUSER } = require("../../helpers/testHelpers");
 
 // Create a new table and insert before each database
 beforeEach(async function () {
@@ -14,6 +16,16 @@ beforeEach(async function () {
   await createAllTables();
   await insertIntoCompanies(UCSF);
   await insertIntoJobs(JRSPECIALIST);
+
+  await request(app).post('/users').send(ADMIN);
+
+  // Make that admin an admin
+  db.query(`UPDATE users
+  SET is_admin = true
+  WHERE username=$1;`, [ADMIN.username]);
+
+  await request(app).post('/users').send(NOOBUSER);
+
 });
 
 // Drop entire table
@@ -32,14 +44,19 @@ describe("POST /jobs", function () {
 
 
   test("Route successfully posts the job posting", async function () {
+
+    const loginResponse = await request(app).post('/login').send(ADMIN);
+    const { token } = loginResponse.body;
+
     const response = await request(app).post(`/jobs`)
       .send({
         title: "Singer",
         salary: 12345,
         equity: 0.66,
-        company_handle: "UCSF"
-      });
-    expect(response.statusCode).toBe(200);
+        company_handle: "UCSF",
+        _token: token
+      },);
+    expect(response.body).toHaveProperty('job');
     expect(response.body.job.title).toEqual("Singer");
     expect(response.body.job.salary).toEqual(12345);
     expect(response.body.job.equity).toEqual(0.66);
@@ -48,12 +65,17 @@ describe("POST /jobs", function () {
   });
 
   test("Route returns 400 if invalid keys in the job posting", async function () {
+
+    const loginResponse = await request(app).post('/login').send(ADMIN);
+    const { token } = loginResponse.body;
+
     const response = await request(app).post(`/jobs`)
       .send({
         asdf: "32432432",
         adsfasd: 1234532432,
         adsfads: 32432432,
-        adfdas: ""
+        adfdas: "",
+        _token: token
       });
     expect(response.statusCode).toBe(400);
     expect(response.body).toEqual({
@@ -70,27 +92,45 @@ describe("READ: GET /jobs", function () {
 
   // Lists all jobs if no query strings are passed
   test("Gets a list of all jobs", async function () {
-    const response = await request(app).get(`/jobs`);
+
+    const loginResponse = await request(app).post('/login').send(ADMIN);
+    const { token } = loginResponse.body;
+
+    const response = await request(app).get(`/jobs`)
+      .send({_token: token});
     expect(response.statusCode).toBe(200);
     expect(response.body.jobs).toHaveLength(1);
   });
 
   // Test the gets with query parameters
   test("Gets a list of all companies that match the title", async function () {
-    const response = await request(app).get(`/jobs?title=JrSpecialist`);
+
+    const loginResponse = await request(app).post('/login').send(ADMIN);
+    const { token } = loginResponse.body;
+
+    const response = await request(app).get(`/jobs?title=JrSpecialist`).send({_token: token});
     expect(response.statusCode).toBe(200);
     expect(response.body).toEqual({ "jobs": [{ "company_handle": "UCSF", "title": "JrSpecialist" }] });
   });
 
 
   test("Return specific company based on valid query params", async function () {
-    const response = await request(app).get(`/jobs?min_salary=3000&min_equity=0`);
+
+    const loginResponse = await request(app).post('/login').send(ADMIN);
+    const { token } = loginResponse.body;
+
+    const response = await request(app).get(`/jobs?min_salary=3000&min_equity=0`).send({_token: token});
     expect(response.statusCode).toBe(200);
     expect(response.body).toEqual({ "jobs": [{ "company_handle": "UCSF", "title": "JrSpecialist" }] });
   });
 
   test("Return nothing if no jobs satisfy valid query params", async function () {
-    const response = await request(app).get(`/jobs?min_salary=999999`);
+
+
+    const loginResponse = await request(app).post('/login').send(ADMIN);
+    const { token } = loginResponse.body;
+
+    const response = await request(app).get(`/jobs?min_salary=999999`).send({_token: token});
     expect(response.statusCode).toBe(200);
     expect(response.body).toEqual({ "jobs": [] });
   });
@@ -100,6 +140,9 @@ describe("READ: GET /jobs", function () {
 describe("PATCH /jobs/:id", function () {
   test("Successfully updates a single job posting by id", async function () {
 
+    const loginResponse = await request(app).post('/login').send(ADMIN);
+    const { token } = loginResponse.body;
+
     const response = await request(app)
       .patch(`/jobs/1`)
       .send({
@@ -107,6 +150,7 @@ describe("PATCH /jobs/:id", function () {
         salary: 40000,
         equity: 0.2,
         company_handle: "UCSF",
+        _token: token
       });
 
     expect(response.statusCode).toBe(200);
@@ -126,12 +170,17 @@ describe("PATCH /jobs/:id", function () {
 
   // invalid job id - id does not exist
   test("Responds with 404 if id invalid", async function () {
+
+    const loginResponse = await request(app).post('/login').send(ADMIN);
+    const { token } = loginResponse.body;
+    
     const response = await request(app).patch(`/jobs/22`)
       .send({
         title: "JrSpecialistII",
         salary: 40000,
         equity: 0.2,
         company_handle: "UCSF",
+        _token: token
       });
 
     expect(response.statusCode).toBe(404);
@@ -140,12 +189,17 @@ describe("PATCH /jobs/:id", function () {
 
   // invalid job id - id isn't an integer
   test("Responds with 404 if id invalid", async function () {
+
+    const loginResponse = await request(app).post('/login').send(ADMIN);
+    const { token } = loginResponse.body;
+
     const response = await request(app).patch(`/jobs/akdsfj`)
       .send({
         title: "JrSpecialistII",
         salary: 40000,
         equity: 0.2,
         company_handle: "UCSF",
+        _token: token
       });
 
     expect(response.statusCode).toBe(500);
@@ -157,7 +211,11 @@ describe("PATCH /jobs/:id", function () {
 // Delete a job
 describe("DELETE /jobs/:id", function () {
   test("Deletes a single a job by id", async function () {
-    const response = await request(app).delete(`/jobs/1`);
+
+    const loginResponse = await request(app).post('/login').send(ADMIN);
+    const { token } = loginResponse.body;
+
+    const response = await request(app).delete(`/jobs/1`).send({_token:token});
     expect(response.statusCode).toBe(200);
     expect(response.body).toEqual({ message: "Job deleted" });
   });
